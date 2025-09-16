@@ -248,15 +248,31 @@
             </thead>
             <tbody>
             {% for detail in details %}
-                <tr>
-                    <td class="p-2 border">{{ detail.position }}</td>
-                    <td class="p-2 border">{{ detail.agent_name }}</td>
-                    <td class="p-2 border">{{ detail.particulars }}</td>
-                    <td class="p-2 border text-center">{{ detail.commission_rate|floatformat:2 }}%</td>
-                    <td class="p-2 border">₱{{ detail.gross_commission|floatformat:2|intcomma }}</td>
-                    <td class="p-2 border">₱{{ detail.withholding_tax|floatformat:2|intcomma }}</td>
-                    <td class="p-2 border">₱{{ detail.net_commission|floatformat:2|intcomma }}</td>
-                </tr>
+                {% comment %}Hide management positions for sales managers{% endcomment %}
+                {% if user.profile.role == 'Sales Manager' and user.is_staff %}
+                    {% if detail.position != 'Operations Manager' and detail.position != 'Operation Manager' and detail.position != 'Co-Founder' and detail.position != 'Cofounder' and detail.position != 'Co Founder' and detail.position != 'Founder' and detail.position != 'Funds' %}
+                    <tr>
+                        <td class="p-2 border">{{ detail.position }}</td>
+                        <td class="p-2 border">{{ detail.agent_name }}</td>
+                        <td class="p-2 border">{{ detail.particulars }}</td>
+                        <td class="p-2 border text-center">{{ detail.commission_rate|floatformat:2 }}%</td>
+                        <td class="p-2 border">₱{{ detail.gross_commission|floatformat:2|intcomma }}</td>
+                        <td class="p-2 border">₱{{ detail.withholding_tax|floatformat:2|intcomma }}</td>
+                        <td class="p-2 border">₱{{ detail.net_commission|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+                {% else %}
+                    {% comment %}Show all positions for superusers and other staff{% endcomment %}
+                    <tr>
+                        <td class="p-2 border">{{ detail.position }}</td>
+                        <td class="p-2 border">{{ detail.agent_name }}</td>
+                        <td class="p-2 border">{{ detail.particulars }}</td>
+                        <td class="p-2 border text-center">{{ detail.commission_rate|floatformat:2 }}%</td>
+                        <td class="p-2 border">₱{{ detail.gross_commission|floatformat:2|intcomma }}</td>
+                        <td class="p-2 border">₱{{ detail.withholding_tax|floatformat:2|intcomma }}</td>
+                        <td class="p-2 border">₱{{ detail.net_commission|floatformat:2|intcomma }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             
             {% if user.is_staff or user.is_superuser or user.profile.role == 'Sales Manager' %}

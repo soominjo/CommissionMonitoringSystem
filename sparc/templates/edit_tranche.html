@@ -155,40 +155,38 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              {% for payment in record.payments.all %}
-              {% if not payment.is_lto %}
+              {% for item in dp_tranches %}
               <tr class="hover:bg-blue-50 transition-colors duration-300">
-                <td class="px-6 py-4 font-bold text-blue-600">{{ payment.tranche_number }}</td>
-                <td class="px-6 py-4 text-gray-700">{{ payment.expected_date|date:"M d, Y" }}</td>
-                <td class="px-6 py-4 font-semibold text-green-600">₱{{ payment.expected_amount|floatformat:2|intcomma }}</td>
+                <td class="px-6 py-4 font-bold text-blue-600">{{ item.tranche.tranche_number }}</td>
+                <td class="px-6 py-4 text-gray-700">{{ item.tranche.expected_date|date:"M d, Y" }}</td>
+                <td class="px-6 py-4 font-semibold text-green-600">₱{{ item.expected_commission|floatformat:2|intcomma }}</td>
                 <td class="px-6 py-4">
                   <div class="relative">
                     <span class="absolute left-3 top-3 text-green-600 font-bold">₱</span>
                     <input type="number" 
-                           name="received_amount_{{ payment.id }}" 
-                           value="{{ payment.received_amount|default:0 }}"
+                           name="received_amount_{{ item.tranche.id }}" 
+                           value="{{ item.tranche.received_amount|default:0 }}"
                            step="0.01"
                            class="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 input-focus transition-all bg-white shadow-sm"
-                           onchange="updateStatus(this, '{{ payment.expected_amount }}', 'status_{{ payment.id }}')">
+                           onchange="updateStatus(this, '{{ item.expected_commission }}', 'status_{{ item.tranche.id }}')">
                   </div>
                 </td>
                 <td class="px-6 py-4">
                   <input type="date" 
-                         name="date_received_{{ payment.id }}" 
-                         value="{% if payment.date_received %}{{ payment.date_received|date:'Y-m-d' }}{% endif %}"
+                         name="date_received_{{ item.tranche.id }}" 
+                         value="{% if item.tranche.date_received %}{{ item.tranche.date_received|date:'Y-m-d' }}{% endif %}"
                          class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 input-focus transition-all bg-white shadow-sm">
                 </td>
                 <td class="px-6 py-4">
-                  <span id="status_{{ payment.id }}" 
+                  <span id="status_{{ item.tranche.id }}" 
                         class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold status-indicator
-                        {% if payment.status == 'Received' %}bg-green-100 text-green-800
-                        {% elif payment.status == 'Partial' %}bg-yellow-100 text-yellow-800
+                        {% if item.tranche.status == 'Received' %}bg-green-100 text-green-800
+                        {% elif item.tranche.status == 'Partial' %}bg-yellow-100 text-yellow-800
                         {% else %}bg-red-100 text-red-800{% endif %}">
-                    {{ payment.status }}
+                    {{ item.tranche.status }}
                   </span>
                 </td>
               </tr>
-              {% endif %}
               {% endfor %}
             </tbody>
           </table>
@@ -217,39 +215,37 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              {% for payment in record.payments.all %}
-              {% if payment.is_lto %}
+              {% for item in lto_tranches %}
               <tr class="hover:bg-orange-50 transition-colors duration-300">
-                <td class="px-6 py-4 text-gray-700">{{ payment.expected_date|date:"M d, Y" }}</td>
-                <td class="px-6 py-4 font-semibold text-green-600">₱{{ lto_deduction_net|floatformat:2|intcomma }}</td>
+                <td class="px-6 py-4 text-gray-700">{{ item.tranche.expected_date|date:"M d, Y" }}</td>
+                <td class="px-6 py-4 font-semibold text-green-600">₱{{ item.expected_commission|floatformat:2|intcomma }}</td>
                 <td class="px-6 py-4">
                   <div class="relative">
                     <span class="absolute left-3 top-3 text-green-600 font-bold">₱</span>
                     <input type="number" 
-                           name="received_amount_{{ payment.id }}" 
-                           value="{{ payment.received_amount|default:0 }}"
+                           name="received_amount_{{ item.tranche.id }}" 
+                           value="{{ item.tranche.received_amount|default:0 }}"
                            step="0.01"
                            class="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 input-focus transition-all bg-white shadow-sm"
-                           onchange="updateStatus(this, '{{ payment.expected_amount }}', 'status_{{ payment.id }}')">
+                           onchange="updateStatus(this, '{{ item.expected_commission }}', 'status_{{ item.tranche.id }}')">
                   </div>
                 </td>
                 <td class="px-6 py-4">
                   <input type="date" 
-                         name="date_received_{{ payment.id }}" 
-                         value="{% if payment.date_received %}{{ payment.date_received|date:'Y-m-d' }}{% endif %}"
+                         name="date_received_{{ item.tranche.id }}" 
+                         value="{% if item.tranche.date_received %}{{ item.tranche.date_received|date:'Y-m-d' }}{% endif %}"
                          class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 input-focus transition-all bg-white shadow-sm">
                 </td>
                 <td class="px-6 py-4">
-                  <span id="status_{{ payment.id }}" 
+                  <span id="status_{{ item.tranche.id }}" 
                         class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold status-indicator
-                        {% if payment.status == 'Received' %}bg-green-100 text-green-800
-                        {% elif payment.status == 'Partial' %}bg-yellow-100 text-yellow-800
+                        {% if item.tranche.status == 'Received' %}bg-green-100 text-green-800
+                        {% elif item.tranche.status == 'Partial' %}bg-yellow-100 text-yellow-800
                         {% else %}bg-red-100 text-red-800{% endif %}">
-                    {{ payment.status }}
+                    {{ item.tranche.status }}
                   </span>
                 </td>
               </tr>
-              {% endif %}
               {% endfor %}
             </tbody>
           </table>

@@ -223,11 +223,11 @@ class CommissionForm(forms.Form):
     commission_rate = forms.DecimalField(max_digits=5, decimal_places=2, initial=7)
     # VAT rate field allows users to specify VAT percentage (default 12%)
     vat_rate = forms.DecimalField(
-        max_digits=5,
-        decimal_places=2,
+        max_digits=8,
+        decimal_places=5,
         required=True,
-        initial=12.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'max': '100'}),
+        initial=12.00000,
+        widget=forms.NumberInput(attrs={'step': '0.00001', 'min': '0', 'max': '100'}),
         label="VAT Rate (%)"
     )
     tranche_option = forms.ChoiceField(
@@ -240,11 +240,11 @@ class CommissionForm(forms.Form):
     )
     tax_rate = forms.DecimalField(max_digits=5, decimal_places=2, required=False, label="Tax Rate (%)")
     withholding_tax_rate = forms.DecimalField(
-        max_digits=5,
-        decimal_places=2,
+        max_digits=8,
+        decimal_places=5,
         required=True,
-        initial=10.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'max': '100'}),
+        initial=10.00000,
+        widget=forms.NumberInput(attrs={'step': '0.00001', 'min': '0', 'max': '100'}),
         label="Withholding Tax Rate (%)"
     )
     process_fee_percentage = forms.DecimalField(
@@ -259,30 +259,30 @@ class CommissionForm(forms.Form):
     # New fields for "Condition for Commission Rate"
     option1_percentage = forms.DecimalField(max_digits=5, decimal_places=2, initial=50, label="Within Down Payment Period (%)")
     option1_tax_rate = forms.DecimalField(
-        max_digits=5,
-        decimal_places=2,
+        max_digits=8,
+        decimal_places=5,
         required=True,
-        initial=10.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'max': '100'}),
+        initial=10.00000,
+        widget=forms.NumberInput(attrs={'step': '0.00001', 'min': '0', 'max': '100'}),
         label="Tax Rate for DP Period (%)"
     )
 
     option2_percentage = forms.DecimalField(max_digits=5, decimal_places=2, initial=50, label="Upon Loan Take Out (%)")
     option2_tax_rate = forms.DecimalField(
-        max_digits=5,
-        decimal_places=2,
+        max_digits=8,
+        decimal_places=5,
         required=True,
-        initial=10.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'max': '100'}),
+        initial=10.00000,
+        widget=forms.NumberInput(attrs={'step': '0.00001', 'min': '0', 'max': '100'}),
         label="Tax Rate for Loan Take Out (%)"
     )
 
     deduction_tax_rate = forms.DecimalField(
-        max_digits=5,
-        decimal_places=2,
+        max_digits=8,
+        decimal_places=5,
         required=False,
-        initial=10.00,
-        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'max': '100'}),
+        initial=10.00000,
+        widget=forms.NumberInput(attrs={'step': '0.00001', 'min': '0', 'max': '100'}),
         label="Tax Rate for Other Deduction (%)"
     )
 

@@ -79,27 +79,37 @@
       <div>
         <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
           <i class="fas fa-history text-blue-500 mr-3"></i>
-          Tranche Dashboard
+          Account Summary Dashboard
         </h1>
-        <p class="text-gray-600 mt-2">Track and manage all payment tranches</p>
+        <p class="text-gray-600 mt-2">Track and manage all account records</p>
       </div>
       
-      {% if user.is_superuser or user.is_staff %}
-      <a href="{% url 'tranches' %}" 
-         class="inline-flex items-center px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition-all duration-300">
-        <i class="fas fa-plus-circle mr-2"></i> 
-        Create Tranche
-      </a>
-      {% endif %}
+      <div class="flex flex-col md:flex-row items-center gap-4">
+        <!-- Total Units Card -->
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-blue-600">Total Units</h3>
+              <p class="text-2xl font-bold text-blue-600 mt-1">{{ total_records }}</p>
+            </div>
+          </div>
+        
+        {% if user.is_superuser or user.is_staff %}
+        <a href="{% url 'tranches' %}" 
+           class="inline-flex items-center px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition-all duration-300">
+          <i class="fas fa-plus-circle mr-2"></i> 
+          Create Tranche
+        </a>
+        {% endif %}
+      </div>
     </div>
     
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-2xl border-l-4 border-green-500">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white gradient-bg shadow-lg border-l-4 border-green-500 p-6 rounded-2xl">
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-lg font-medium text-green-800">Total Value</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">₱{{ total_contract_value|floatformat:2|intcomma }}</p>
+            <h3 class="text-lg font-medium text-gray-600">Total Account Value</h3>
+            <p class="text-3xl font-bold text-green-600 mt-2">₱{{ total_contract_value|floatformat:2|intcomma }}</p>
           </div>
           <div class="bg-green-100 p-3 rounded-full">
             <i class="fas fa-money-bill-wave text-green-600 text-xl"></i>
@@ -107,32 +117,42 @@
         </div>
       </div>
       
-   
-      
-      <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-2xl border-l-4 border-blue-500">
+      <div class="bg-white gradient-bg shadow-lg border-l-4 border-blue-500 p-6 rounded-2xl">
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-lg font-medium text-blue-800">Active Units</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">{{ active_tranches }}</p>
+            <h3 class="text-lg font-medium text-gray-600">Total Gross Commission</h3>
+            <p class="text-3xl font-bold text-blue-600 mt-2">₱{{ total_gross_commission|floatformat:2|intcomma }}</p>
           </div>
           <div class="bg-blue-100 p-3 rounded-full">
-            <i class="fas fa-sync-alt text-blue-600 text-xl"></i>
+            <i class="fas fa-chart-line text-blue-600 text-xl"></i>
           </div>
         </div>
       </div>
 
-
-      <div class="bg-gradient-to-r from-orange-50 to-orange-100 p-6 rounded-2xl border-l-4 border-orange-500">
+      <div class="bg-white gradient-bg shadow-lg border-l-4 border-orange-500 p-6 rounded-2xl">
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-lg font-medium text-orange-800">Total Units</h3>
-            <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_records }}</p>
+            <h3 class="text-lg font-medium text-gray-600">Total Net Commission</h3>
+            <p class="text-3xl font-bold text-orange-600 mt-2">₱{{ total_net_commission|floatformat:2|intcomma }}</p>
           </div>
           <div class="bg-orange-100 p-3 rounded-full">
-            <i class="fas fa-list-alt text-orange-600 text-xl"></i>
+            <i class="fas fa-coins text-orange-600 text-xl"></i>
           </div>
         </div>
       </div>
+      
+      <div class="bg-white gradient-bg shadow-lg border-l-4 border-yellow-500 p-6 rounded-2xl">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-lg font-medium text-gray-600">Active Units</h3>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">{{ active_tranches }}</p>
+          </div>
+          <div class="bg-yellow-100 p-3 rounded-full">
+            <i class="fas fa-sync-alt text-yellow-600 text-xl"></i>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     
@@ -380,8 +400,8 @@
         <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
           <i class="fas fa-file-alt text-blue-500 text-2xl"></i>
         </div>
-        <h3 class="text-lg font-medium text-gray-800 mb-2">No tranche records found</h3>
-        <p class="text-gray-600">Create your first tranche record to get started</p>
+        <h3 class="text-lg font-medium text-gray-800 mb-2">No account records found</h3>
+        <p class="text-gray-600">Create your first account record to get started</p>
       </div>
       {% endif %}
     </div>

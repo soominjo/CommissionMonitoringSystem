@@ -201,13 +201,27 @@
             <tbody>
                 {% for detail in details %}
                     {% if detail.commission_rate and detail.commission_rate > 0 %}
-                    <tr class="text-center">
-                        <td class="p-2 border">{{ detail.position }}</td>
-                        <td class="p-2 border">{{ detail.commission_rate|floatformat:2 }}%</td>
-                        <td class="p-2 border">₱{{ detail.gross_commission|floatformat:2|intcomma }}</td>
-                        <td class="p-2 border">₱{{ detail.withholding_tax|floatformat:2|intcomma }}</td>
-                        <td class="p-2 border">₱{{ detail.net_commission|floatformat:2|intcomma }}</td>
-                    </tr>
+                        {% comment %}Hide management positions for sales managers{% endcomment %}
+                        {% if user.profile.role == 'Sales Manager' and user.is_staff %}
+                            {% if detail.position != 'Operations Manager' and detail.position != 'Operation Manager' and detail.position != 'Co-Founder' and detail.position != 'Cofounder' and detail.position != 'Co Founder' and detail.position != 'Founder' and detail.position != 'Funds' %}
+                            <tr class="text-center">
+                                <td class="p-2 border">{{ detail.position }}</td>
+                                <td class="p-2 border">{{ detail.commission_rate|floatformat:2 }}%</td>
+                                <td class="p-2 border">₱{{ detail.gross_commission|floatformat:2|intcomma }}</td>
+                                <td class="p-2 border">₱{{ detail.withholding_tax|floatformat:2|intcomma }}</td>
+                                <td class="p-2 border">₱{{ detail.net_commission|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% endif %}
+                        {% else %}
+                            {% comment %}Show all positions for superusers and other staff{% endcomment %}
+                            <tr class="text-center">
+                                <td class="p-2 border">{{ detail.position }}</td>
+                                <td class="p-2 border">{{ detail.commission_rate|floatformat:2 }}%</td>
+                                <td class="p-2 border">₱{{ detail.gross_commission|floatformat:2|intcomma }}</td>
+                                <td class="p-2 border">₱{{ detail.withholding_tax|floatformat:2|intcomma }}</td>
+                                <td class="p-2 border">₱{{ detail.net_commission|floatformat:2|intcomma }}</td>
+                            </tr>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
                 <!-- Totals Row -->

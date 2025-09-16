@@ -147,11 +147,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 {% if user.is_superuser or user.is_staff %}lg:grid-cols-5{% else %}lg:grid-cols-4{% endif %} gap-6 mb-8">
 
             <!-- Sales Agents -->
-            <div class="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-2xl border-l-4 border-green-500">
+            <div class="bg-white gradient-bg shadow-lg p-6 rounded-2xl border-l-4 border-green-500">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h3 class="text-lg font-medium text-green-800">Sales Agents</h3>
-                        <p class="text-3xl font-bold text-gray-800 mt-2">{{ sales_agents_count }}</p>
+                        <h3 class="text-lg font-medium text-green-600">Sales Agents</h3>
+                        <p class="text-3xl font-bold text-gray-600 mt-2">{{ sales_agents_count }}</p>
                     </div>
                     <div class="bg-green-100 p-3 rounded-full">
                         <i class="fas fa-user-tag text-green-600 text-xl"></i>
@@ -160,11 +160,11 @@
             </div>
 
            <!-- Sales Supervisors -->
-           <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-2xl border-l-4 border-blue-500">
+           <div class="bg-white gradient-bg shadow-lg p-6 rounded-2xl border-l-4 border-blue-500">
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="text-lg font-medium text-blue-800">Sales Supervisors</h3>
-                    <p class="text-3xl font-bold text-gray-800 mt-2">{{ sales_supervisors_count }}</p>
+                    <h3 class="text-lg font-medium text-blue-600">Sales Supervisors</h3>
+                    <p class="text-3xl font-bold text-gray-600 mt-2">{{ sales_supervisors_count }}</p>
                 </div>
                 <div class="bg-blue-100 p-3 rounded-full">
                     <i class="fas fa-user-graduate text-blue-600 text-xl"></i>
@@ -175,7 +175,7 @@
              
             <!-- Sales Managers -->
                   
-            <div class="bg-gradient-to-r from-orange-50 to-orange-100 p-6 rounded-2xl border-l-4 border-orange-500">
+            <div class="bg-white gradient-bg shadow-lg p-6 rounded-2xl border-l-4 border-orange-500">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="text-lg font-medium text-orange-800">Sales Managers</h3>
@@ -193,7 +193,7 @@
 
             {% if user.is_superuser or user.is_staff %}
             <!-- Staff (Superuser only) -->
-            <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 p-6 rounded-2xl border-l-4 border-yellow-500">
+            <div class="bg-white gradient-bg shadow-lg p-6 rounded-2xl border-l-4 border-yellow-500">
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="text-lg font-yellow text-yellow-800">Staff Members</h3>
@@ -208,7 +208,7 @@
 
 
                       <!-- Total Users -->
-                      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-2xl border-l-4 border-gray-500">
+                      <div class="bg-white gradient-bg shadow-lg p-6 rounded-2xl border-l-4 border-gray-500">
                         <div class="flex justify-between items-center">
                             <div>
                                 <h3 class="text-lg font-medium text-gray-800">Total Users</h3>
@@ -372,7 +372,7 @@
                                  src="{{ profile.image.url }}" 
                                  alt="{{ profile.user.username }}'s avatar">
                             <div class="ml-4">
-                                <h3 class="font-bold text-gray-800">{{ profile.user.username }}</h3>
+                                <h3 class="font-bold text-gray-800 capitalize">{{ profile.user.username }}</h3>
                                 <p class="text-sm text-gray-600">{{ profile.user.email }}</p>
                             </div>
                         </div>

@@ -100,7 +100,7 @@
                     {% widthratio total_commission total_commission|add:total_remaining 100 as collection_rate %}
                     <p class="text-2xl font-bold text-yellow-600">{{ collection_rate|floatformat:1 }}%</p>
                 {% else %}
-                    <p class="text-2xl font-bold text-blue-600">0.0%</p>
+                    <p class="text-2xl font-bold text-yellow-600">0.0%</p>
                 {% endif %}
                 <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
                     <div id="collectionRateBar" class="bg-yellow-600 h-2 rounded-full transition-all duration-500"></div>
@@ -160,6 +160,16 @@
       </select>
     </div>
 
+    <!-- Commission Type Filter -->
+    <div>
+      <label for="commissionTypeFilter" class="block text-sm font-medium text-gray-700 mb-2">Commission Type</label>
+      <select id="commissionTypeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+        <option value="">All Commissions</option>
+        <option value="received" {% if selected_commission_type == 'received' %}selected{% endif %}>Received Only</option>
+        <option value="pending" {% if selected_commission_type == 'pending' %}selected{% endif %}>Pending Only</option>
+      </select>
+    </div>
+
     <!-- Developer Filter -->
     <div>
       <label for="developerFilter" class="block text-sm font-medium text-gray-700 mb-2">Developer</label>
@@ -182,6 +192,32 @@
       </select>
     </div>
 
+    
+    <!-- User Filter with Autocomplete (For superusers, managers, and supervisors) -->
+    {% if user.is_superuser or user.is_staff %}
+    <div class="relative">
+      <label for="userFilter" class="block text-sm font-medium text-gray-700 mb-2">User</label>
+      <div class="relative">
+        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 z-10">
+          <i class="fas fa-user text-gray-400"></i>
+        </div>
+        <input type="text" 
+               id="userFilter" 
+               placeholder="Search for user..."
+               value="{% if selected_user_name %}{{ selected_user_name }}{% endif %}"
+               autocomplete="off"
+               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+        <input type="hidden" id="userFilterId" value="{{ selected_user }}">
+        
+        <!-- Autocomplete Dropdown -->
+        <div id="userAutocompleteDropdown" 
+             class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto hidden">
+          <!-- Suggestions will be populated here -->
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <!-- Team Filter (Only for superusers) -->
     {% if user.is_superuser and all_teams %}
     <div>
@@ -195,18 +231,6 @@
     </div>
     {% endif %}
 
-    <!-- User Filter (Only for superusers) -->
-    {% if user.is_superuser and all_users %}
-    <div>
-      <label for="userFilter" class="block text-sm font-medium text-gray-700 mb-2">User</label>
-      <select id="userFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
-        <option value="">All Users</option>
-        {% for agent in all_users %}
-          <option value="{{ agent.id }}" {% if agent.id|stringformat:"s" == selected_user %}selected{% endif %}>{{ agent.get_full_name|default:agent.username }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    {% endif %}
 
     <!-- Type Filter -->
     <div>
@@ -233,13 +257,45 @@
     <div class="md:col-span-2 lg:col-span-2">
       <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
       <div class="relative">
-        <input type="text" id="searchInput" placeholder="Search by project, buyer, or release code..." 
+        <input type="text" id="searchInput" placeholder="Search by project, buyer, or release code..."
                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Date Range Filter -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
+    <div class="flex flex-col md:flex-row gap-4 items-center">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <h3 class="text-lg font-semibold text-gray-800">Custom Date Range</h3>
+      </div>
+      <div class="flex gap-3 w-full md:w-auto">
+        <div class="flex-1 md:w-40">
+          <input type="date" id="dateFrom" name="date_from" value="{{ selected_date_from }}"
+                 placeholder="From Date"
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+        </div>
+        <div class="flex-1 md:w-40">
+          <input type="date" id="dateTo" name="date_to" value="{{ selected_date_to }}"
+                 placeholder="To Date"
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+        </div>
+        <button type="button" id="applyDateRange" 
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 whitespace-nowrap">
+          Apply
+        </button>
+        <button type="button" id="clearDateRange" 
+                class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200 whitespace-nowrap">
+          Clear
+        </button>
       </div>
     </div>
   </div>
@@ -370,7 +426,7 @@
             </div>
             <div class="flex space-x-2">
                 {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}" 
+                    <a href="?page={{ page_obj.previous_page_number }}{% if selected_team %}&team={{ selected_team }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if selected_developer %}&developer={{ selected_developer }}{% endif %}{% if selected_property %}&property={{ selected_property }}{% endif %}{% if selected_commission_type %}&commission_type={{ selected_commission_type }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_date_from %}&date_from={{ selected_date_from }}{% endif %}{% if selected_date_to %}&date_to={{ selected_date_to }}{% endif %}" 
                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                         Previous
                     </a>
@@ -381,7 +437,7 @@
                 </span>
                 
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" 
+                    <a href="?page={{ page_obj.next_page_number }}{% if selected_team %}&team={{ selected_team }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if selected_developer %}&developer={{ selected_developer }}{% endif %}{% if selected_property %}&property={{ selected_property }}{% endif %}{% if selected_commission_type %}&commission_type={{ selected_commission_type }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_date_from %}&date_from={{ selected_date_from }}{% endif %}{% if selected_date_to %}&date_to={{ selected_date_to }}{% endif %}" 
                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                         Next
                     </a>
@@ -394,6 +450,7 @@
 
 {{ monthly_labels|json_script:"monthly-labels" }}
 {{ monthly_collections|json_script:"monthly-collections" }}
+{{ monthly_targets|json_script:"monthly-targets" }}
 
 <!-- Chart.js for Data Visualization -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -451,6 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const propertyFilter = document.getElementById('propertyFilter');
     const yearFilter = document.getElementById('yearFilter');
     const monthFilter = document.getElementById('monthFilter');
+    const commissionTypeFilter = document.getElementById('commissionTypeFilter');
     const userFilter = document.getElementById('userFilter');
     const teamFilter = document.getElementById('teamFilter');
 
@@ -459,8 +517,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const property = propertyFilter.value;
         const year = yearFilter.value;
         const month = monthFilter.value;
+        const commissionType = commissionTypeFilter ? commissionTypeFilter.value : '';
         const user = userFilter ? userFilter.value : '';
         const team = teamFilter ? teamFilter.value : '';
+        const dateFrom = document.getElementById('dateFrom') ? document.getElementById('dateFrom').value : '';
+        const dateTo = document.getElementById('dateTo') ? document.getElementById('dateTo').value : '';
         
         // Build URL with current filters
         const url = new URL(window.location);
@@ -489,6 +550,12 @@ document.addEventListener('DOMContentLoaded', function() {
             url.searchParams.delete('month');
         }
         
+        if (commissionType) {
+            url.searchParams.set('commission_type', commissionType);
+        } else {
+            url.searchParams.delete('commission_type');
+        }
+        
         if (user) {
             url.searchParams.set('user', user);
         } else {
@@ -498,6 +565,18 @@ document.addEventListener('DOMContentLoaded', function() {
             url.searchParams.set('team', team);
         } else {
             url.searchParams.delete('team');
+        }
+        
+        if (dateFrom) {
+            url.searchParams.set('date_from', dateFrom);
+        } else {
+            url.searchParams.delete('date_from');
+        }
+        
+        if (dateTo) {
+            url.searchParams.set('date_to', dateTo);
+        } else {
+            url.searchParams.delete('date_to');
         }
         
         // Reset page to 1 when filtering
@@ -524,12 +603,46 @@ document.addEventListener('DOMContentLoaded', function() {
     yearFilter.addEventListener('change', handleYearFilter);
     monthFilter.addEventListener('change', handleAllFilters);
     
+    // Add commission type filter event listener
+    if (commissionTypeFilter) {
+        commissionTypeFilter.addEventListener('change', handleAllFilters);
+    }
+    
     // Add user filter event listener (only if userFilter exists)
     if (userFilter) {
         userFilter.addEventListener('change', handleAllFilters);
     }
     if (teamFilter) {
         teamFilter.addEventListener('change', handleAllFilters);
+    }
+
+    // Custom Date Range Event Listeners
+    const dateFromInput = document.getElementById('dateFrom');
+    const dateToInput = document.getElementById('dateTo');
+    const applyDateRangeBtn = document.getElementById('applyDateRange');
+    const clearDateRangeBtn = document.getElementById('clearDateRange');
+
+    if (applyDateRangeBtn) {
+        applyDateRangeBtn.addEventListener('click', function() {
+            // Validate date range
+            const fromDate = dateFromInput ? dateFromInput.value : '';
+            const toDate = dateToInput ? dateToInput.value : '';
+            
+            if (fromDate && toDate && fromDate > toDate) {
+                alert('From date cannot be later than To date.');
+                return;
+            }
+            
+            handleAllFilters();
+        });
+    }
+
+    if (clearDateRangeBtn) {
+        clearDateRangeBtn.addEventListener('click', function() {
+            if (dateFromInput) dateFromInput.value = '';
+            if (dateToInput) dateToInput.value = '';
+            handleAllFilters();
+        });
     }
 
     // Commission Status Distribution Chart (Received vs Remaining)
@@ -580,19 +693,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Monthly Collection Progress Chart
+    // Monthly Collection Progress Chart (aligned with applied filters)
     const monthlyTrendCtx = document.getElementById('monthlyTrendChart');
     if (monthlyTrendCtx) {
         // Safely parse data from the DOM
         const labelsEl = document.getElementById('monthly-labels');
         const collectionsEl = document.getElementById('monthly-collections');
+        const targetsEl = document.getElementById('monthly-targets');
 
         const monthlyLabels = labelsEl ? JSON.parse(labelsEl.textContent) : [];
         const monthlyCollections = collectionsEl ? JSON.parse(collectionsEl.textContent) : [];
+        const monthlyTargets = targetsEl ? JSON.parse(targetsEl.textContent) : [];
 
-        // Create a target line (e.g., average collection)
-        const averageCollection = monthlyCollections.reduce((a, b) => a + b, 0) / (monthlyCollections.length || 1);
-        const targetData = Array(monthlyCollections.length).fill(averageCollection * 1.2); // Target is 20% above average
+        // Use real targets data from filtered calculations instead of artificial average
 
         new Chart(monthlyTrendCtx, {
             type: 'line',
@@ -612,8 +725,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         pointRadius: 5
                     },
                     {
-                        label: 'Target',
-                        data: targetData,
+                        label: 'Remaining',
+                        data: monthlyTargets,
                         borderColor: '#F59E0B',
                         backgroundColor: 'transparent',
                         borderDash: [5, 5],
@@ -674,6 +787,156 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // User Autocomplete functionality
+    let userAutocompleteTimeout;
+    let currentUserHighlightIndex = -1;
+
+    function showUserAutocomplete(query) {
+        const dropdown = document.getElementById('userAutocompleteDropdown');
+        
+        if (query.length < 1) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+        
+        // Show loading
+        dropdown.innerHTML = '<div class="user-autocomplete-loading"><i class="fas fa-spinner fa-spin mr-2"></i>Searching...</div>';
+        dropdown.classList.remove('hidden');
+        
+        // Fetch suggestions
+        fetch(`{% url 'user_filter_autocomplete' %}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                displayUserSuggestions(data.suggestions);
+            })
+            .catch(error => {
+                console.error('User autocomplete error:', error);
+                dropdown.classList.add('hidden');
+            });
+    }
+
+    function displayUserSuggestions(suggestions) {
+        const dropdown = document.getElementById('userAutocompleteDropdown');
+        currentUserHighlightIndex = -1;
+        
+        if (suggestions.length === 0) {
+            dropdown.innerHTML = '<div class="user-autocomplete-loading">No users found</div>';
+            return;
+        }
+        
+        const html = suggestions.map((suggestion, index) => `
+            <div class="user-autocomplete-item" data-index="${index}" data-user-id="${suggestion.id}" data-full-name="${suggestion.full_name}">
+                <div class="user-autocomplete-name">${suggestion.full_name}</div>
+                <div class="user-autocomplete-details">${suggestion.role} • ${suggestion.team}</div>
+            </div>
+        `).join('');
+        
+        dropdown.innerHTML = html;
+        
+        // Add click listeners
+        dropdown.querySelectorAll('.user-autocomplete-item').forEach(item => {
+            item.addEventListener('click', function() {
+                selectUserSuggestion(this.dataset.userId, this.dataset.fullName);
+            });
+        });
+    }
+
+    function selectUserSuggestion(userId, fullName) {
+        document.getElementById('userFilter').value = fullName;
+        document.getElementById('userFilterId').value = userId;
+        document.getElementById('userAutocompleteDropdown').classList.add('hidden');
+        applyUserFilter();
+    }
+
+    function highlightUserSuggestion(direction) {
+        const items = document.querySelectorAll('.user-autocomplete-item');
+        if (items.length === 0) return;
+        
+        // Remove current highlight
+        if (currentUserHighlightIndex >= 0) {
+            items[currentUserHighlightIndex].classList.remove('highlighted');
+        }
+        
+        // Update index
+        if (direction === 'down') {
+            currentUserHighlightIndex = (currentUserHighlightIndex + 1) % items.length;
+        } else if (direction === 'up') {
+            currentUserHighlightIndex = currentUserHighlightIndex <= 0 ? items.length - 1 : currentUserHighlightIndex - 1;
+        }
+        
+        // Add new highlight
+        items[currentUserHighlightIndex].classList.add('highlighted');
+    }
+
+    function applyUserFilter() {
+        const url = new URL(window.location);
+        const userId = document.getElementById('userFilterId').value;
+        
+        if (userId) {
+            url.searchParams.set('user', userId);
+        } else {
+            url.searchParams.delete('user');
+        }
+        
+        // Remove page parameter to start from page 1
+        url.searchParams.delete('page');
+        
+        // Redirect with new filter
+        window.location.href = url.toString();
+    }
+
+    // User autocomplete event listeners
+    const userFilterInput = document.getElementById('userFilter');
+    const userFilterIdInput = document.getElementById('userFilterId');
+    
+    if (userFilterInput) {
+        userFilterInput.addEventListener('input', function() {
+            clearTimeout(userAutocompleteTimeout);
+            const query = this.value.trim();
+            
+            // Clear the hidden ID when typing
+            if (userFilterIdInput) userFilterIdInput.value = '';
+            
+            userAutocompleteTimeout = setTimeout(() => {
+                showUserAutocomplete(query);
+            }, 300);
+        });
+
+        userFilterInput.addEventListener('keydown', function(event) {
+            const dropdown = document.getElementById('userAutocompleteDropdown');
+            
+            if (!dropdown.classList.contains('hidden')) {
+                if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    highlightUserSuggestion('down');
+                } else if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    highlightUserSuggestion('up');
+                } else if (event.key === 'Enter') {
+                    event.preventDefault();
+                    const highlighted = document.querySelector('.user-autocomplete-item.highlighted');
+                    if (highlighted) {
+                        selectUserSuggestion(highlighted.dataset.userId, highlighted.dataset.fullName);
+                    } else {
+                        applyUserFilter();
+                    }
+                } else if (event.key === 'Escape') {
+                    dropdown.classList.add('hidden');
+                }
+            } else if (event.key === 'Enter') {
+                applyUserFilter();
+            }
+        });
+    }
+
+    // Hide autocomplete when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('userAutocompleteDropdown');
+        if (userFilterInput && dropdown && !userFilterInput.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
 });
 </script>
 
@@ -705,6 +968,41 @@ canvas {
 .chart-container {
     position: relative;
     overflow: hidden;
+}
+
+/* User Autocomplete styles */
+.user-autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+.user-autocomplete-item:hover,
+.user-autocomplete-item.highlighted {
+    background-color: #f8fafc;
+}
+
+.user-autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.user-autocomplete-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.user-autocomplete-details {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.user-autocomplete-loading {
+    padding: 12px 16px;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.875rem;
 }
 </style>
 

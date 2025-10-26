@@ -5,6 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} Inner SPARC Realty Corporation {% endblock %}</title>
+    
+    <!-- Favicon Configuration -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'media/LOGO.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'media/LOGO.png' %}">
+    <link rel="shortcut icon" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{% static 'media/LOGO.png' %}">
+    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'media/LOGO.png' %}">
+    <meta name="msapplication-TileImage" content="{% static 'media/LOGO.png' %}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#ffffff">
+    
     {% tailwind_css %}  <!-- This will include Tailwind CSS -->
     
     <!-- Font Awesome -->
@@ -41,7 +59,19 @@
             visibility: visible;
             opacity: 1;
         }
+        
+        /* Enhanced Mobile Layout Fix */
+        @media (max-width: 768px) {
+            .main-content-container {
+                margin-left: 0 !important;
+                padding-left: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
     </style>
+    
+    {% block extra_head %}{% endblock %}
 
     <!-- Hide navigation/sidebar when printing -->
     <style media="print">
@@ -64,9 +94,9 @@
     {% include 'navbar.html' %}
     {% endif %}
     {% if user.is_authenticated %}
-    <div class="max-w-[calc(100%-1rem)] ml-60 mr-6 mt-5 px-5 sm:px-3 lg:px-14">
+    <div class="main-content-container max-w-[calc(100%-1rem)] ml-0 md:ml-60 mr-6 mt-5 px-5 sm:px-3 lg:px-14">
     {% else %}
-    <div>
+    <div class="main-content-container">
     {% endif %}
         {% block content %}{% endblock %}
     </div>

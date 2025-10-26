@@ -1,4 +1,3 @@
-
 {% extends "index.html" %}
 
 {% block content %}
@@ -20,8 +19,6 @@
     --dark: #212529;
   }
 
-
-
   .stat-card {
     transition: all 0.3s ease;
     border-radius: 12px;
@@ -34,8 +31,6 @@
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   }
-
-
 
   .commission-table {
     border-collapse: separate;
@@ -77,7 +72,41 @@
     border-radius: 16px;
   }
 
+  /* Mobile optimizations - ENHANCED */
   @media (max-width: 768px) {
+    /* Hide sidebar and navigation elements */
+    .sidebar,
+    .burger-menu,
+    .nav-toggle,
+    .mobile-menu-toggle,
+    .sidebar-overlay,
+    .navigation-sidebar {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    
+    /* Ensure main content takes full width */
+    .main-content,
+    .content-wrapper,
+    body,
+    .container {
+      margin-left: 0 !important;
+      padding-left: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    
+    /* Reset any sidebar-related margins/padding */
+    .page-wrapper {
+      margin-left: 0 !important;
+      padding-left: 0 !important;
+    }
+    
     .stats-grid {
       grid-template-columns: 1fr;
       gap: 1rem;
@@ -96,6 +125,152 @@
       overflow-x: auto;
       display: block;
     }
+    
+    /* Mobile-specific adjustments */
+    .flex.justify-between.items-center.mb-6.mt-14 {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem !important;
+      margin-top: 1rem !important;
+    }
+    
+    .flex.items-center.gap-3 {
+      flex-direction: column !important;
+      width: 100% !important;
+      gap: 0.75rem !important;
+    }
+    
+    .flex.items-center.gap-3 a {
+      width: 100% !important;
+      text-align: center !important;
+    }
+    
+    /* Grid adjustments */
+    .grid.grid-cols-1.md\\:grid-cols-4 {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .grid.grid-cols-1.lg\\:grid-cols-2 {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-6 {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+    
+    /* Chart containers */
+    .h-64 {
+      height: 200px !important;
+    }
+    
+    /* Action button adjustments */
+    .action-btn:hover {
+      transform: none;
+    }
+    
+    /* Text size adjustments */
+    .text-3xl {
+      font-size: 1.875rem !important;
+    }
+    
+    .text-2xl {
+      font-size: 1.5rem !important;
+    }
+    
+    /* Padding adjustments */
+    .p-6 {
+      padding: 1rem !important;
+    }
+    
+    .p-4 {
+      padding: 0.75rem !important;
+    }
+    
+    /* Gap adjustments */
+    .gap-4 {
+      gap: 0.75rem !important;
+    }
+    
+    .gap-6 {
+      gap: 1rem !important;
+    }
+    
+    /* Flex direction adjustments */
+    .flex.items-center.gap-4 {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+    }
+    
+    /* Legend adjustments */
+    .mt-4.flex.justify-center.gap-2.flex-wrap {
+      flex-direction: column !important;
+      gap: 0.5rem !important;
+    }
+    
+    .text-center {
+      text-align: left !important;
+    }
+    
+    /* Filter section adjustments */
+    .bg-white.rounded-xl.shadow.p-6.mb-8 {
+      padding: 1rem !important;
+      margin-bottom: 1.5rem !important;
+    }
+  }
+  
+  /* Extra small screens */
+  @media (max-width: 480px) {
+    .px-5.py-2\\.5 {
+      padding: 0.5rem 0.75rem !important;
+    }
+    
+    .text-lg {
+      font-size: 1rem !important;
+    }
+    
+    .rounded-xl {
+      border-radius: 0.75rem !important;
+    }
+    
+    .shadow-lg {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+  }
+  
+  /* User Autocomplete styles */
+  .user-autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+  }
+  
+  .user-autocomplete-item:hover,
+  .user-autocomplete-item.highlighted {
+    background-color: #f8fafc;
+  }
+  
+  .user-autocomplete-item:last-child {
+    border-bottom: none;
+  }
+  
+  .user-autocomplete-name {
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  .user-autocomplete-details {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 2px;
+  }
+  
+  .user-autocomplete-loading {
+    padding: 12px 16px;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.875rem;
   }
 </style>
 
@@ -122,17 +297,13 @@
     </div>
 </div>
 
-<!-- moved filters into Commission Records controls below -->
-
 <!-- Sales Manager Dashboard Section -->
 {% if user.profile and user.profile.role == 'Sales Manager' or user.is_superuser or user.is_staff %}
 <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
 
-  
   <!-- Team Performance Metrics -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
    
-    
     {% if user.is_superuser or user.is_staff %}
     <div class="bg-white gradient-bg shadow-lg rounded-xl p-4 border-l-4 border-green-500">
       <div class="flex items-center justify-between">
@@ -318,9 +489,6 @@
 </div>
 {% endif %}
 
-
- 
-
 <!-- Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
   <!-- Commission Distribution Chart -->
@@ -469,7 +637,7 @@
     <!-- Filters -->
     <div class="bg-white rounded-xl shadow p-6 mb-8">
       <h3 class="text-lg font-semibold text-gray-800 mb-4">Filters</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
         <!-- Year Filter -->
         <div>
           <label for="yearFilter" class="block text-sm font-medium text-gray-700 mb-2">Year</label>
@@ -503,16 +671,34 @@
           </select>
         </div>
 
-        <!-- Property Filter -->
-        <div>
-          <label for="propertyFilter" class="block text-sm font-medium text-gray-700 mb-2">Property</label>
-          <select id="propertyFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
-            <option value="">All Properties</option>
-            {% for property in all_properties %}
-              <option value="{{ property }}" {% if property == selected_property %}selected{% endif %}>{{ property }}</option>
-            {% endfor %}
-          </select>
-        </div>
+          <!-- User Filter with Autocomplete (Only for superusers) -->
+          {% if user.is_superuser or user.is_staff %}
+          <div class="relative">
+            <label for="userFilter" class="block text-sm font-medium text-gray-700 mb-2">User</label>
+            <div class="relative">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 z-10">
+                <i class="fas fa-user text-gray-400"></i>
+              </div>
+              <input type="text" 
+                     id="userFilter" 
+                     placeholder="Search for user..."
+                     value="{% if selected_user_name %}{{ selected_user_name }}{% endif %}"
+                     autocomplete="off"
+                     class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+              <input type="hidden" id="userFilterId" value="{{ selected_user }}">
+              
+              <!-- Autocomplete Dropdown -->
+              <div id="userAutocompleteDropdown" 
+                   class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto hidden">
+                <!-- Suggestions will be populated here -->
+              </div>
+            </div>
+          </div>
+          {% endif %}
+  
+
+       
+        
 
         <!-- Team Filter (Only for superusers) -->
         {% if user.is_superuser and all_teams %}
@@ -527,21 +713,7 @@
         </div>
         {% endif %}
 
-        <!-- User Filter (Only for superusers) -->
-        {% if user.is_superuser or user.is_staff %}
-        {% if all_users %}
-        <div>
-          <label for="userFilter" class="block text-sm font-medium text-gray-700 mb-2">User</label>
-          <select id="userFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
-            <option value="">All Users</option>
-            {% for agent in all_users %}
-              <option value="{{ agent.id }}" {% if agent.id|stringformat:"s" == selected_user %}selected{% endif %}>{{ agent.get_full_name|default:agent.username }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        {% endif %}
-        {% endif %}
-
+      
         <!-- Type Filter -->
         <div>
           <label for="typeFilter" class="block text-sm font-medium text-gray-700 mb-2">Type</label>
@@ -553,18 +725,70 @@
           </select>
         </div>
 
+
+         <!-- Property Filter -->
+         <div>
+          <label for="propertyFilter" class="block text-sm font-medium text-gray-700 mb-2">Property</label>
+          <select id="propertyFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+            <option value="">All Properties</option>
+            {% for property in all_properties %}
+              <option value="{{ property }}" {% if property == selected_property %}selected{% endif %}>{{ property }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+
         <!-- Search -->
         <div>
-          <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+          <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2">
+            Search by Buyer or Unit ID
+          </label>
           <div class="relative">
-            <input type="text" id="searchInput" placeholder="Search records..." 
-                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+            <input type="text" id="searchInput" placeholder="Start typing to search..." 
+                   value="{{ search_query }}"
+                   class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="fas fa-search text-gray-400"></i>
             </div>
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <div id="searchSpinner" class="hidden">
+                <i class="fas fa-spinner fa-spin text-blue-500"></i>
+              </div>
+            </div>
+          </div>
+       
+        </div>
+      </div>
+
+      <!-- Custom Date Range Section -->
+      <div class="mt-6">
+        <h4 class="text-md font-medium text-gray-700 mb-3">
+          <i class="fas fa-calendar-alt mr-1"></i> Custom Date Range
+        </h4>
+        <div class="flex flex-col sm:flex-row gap-3 items-end">
+          <div class="flex-1">
+            <label for="dateFrom" class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+            <input type="date" id="dateFrom" name="date_from" value="{{ selected_date_from }}"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+          </div>
+          <div class="flex-1">
+            <label for="dateTo" class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+            <input type="date" id="dateTo" name="date_to" value="{{ selected_date_to }}"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+          </div>
+          <div class="flex gap-2">
+            <button type="button" id="applyDateRange" 
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 whitespace-nowrap">
+              <i class="fas fa-check mr-1"></i> Apply
+            </button>
+            <button type="button" id="clearDateRange" 
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors duration-200 whitespace-nowrap">
+              <i class="fas fa-times mr-1"></i> Clear
+            </button>
           </div>
         </div>
       </div>
+ 
     </div>
 
     <!-- Table Header -->
@@ -596,20 +820,34 @@
                 <!-- View Button -->
                 {% if slip.slip_type == 'supervisor_agent' %}
                   <a href="{% url 'commission3' slip.id %}" 
-                     class="action-btn bg-blue-500 text-white hover:bg-blue-600"
+                     class="action-btn bg-indigo-500 text-white hover:bg-indigo-600"
                      title="View Supervisor-Agent Commission">
                     <i class="fas fa-users"></i>
                   </a>
-                {% elif slip.is_full_breakdown and user.is_staff or user.is_superuser %}
-                  <a href="{% url 'commission2' slip.id %}" 
+                {% elif slip.source == 'full_breakdown' %}
+                  {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'commission2' slip.id %}" 
+                       class="action-btn bg-indigo-500 text-white hover:bg-indigo-600"
+                       title="View Management Commission">
+                      <i class="fas fa-building"></i>
+                    </a>
+                  {% else %}
+                    <a href="{% url 'commission' slip.id %}" 
+                       class="action-btn bg-indigo-500 text-white hover:bg-indigo-600"
+                       title="View Management Commission">
+                      <i class="fas fa-building"></i>
+                    </a>
+                  {% endif %}
+                {% elif slip.source == 'standard' %}
+                  <a href="{% url 'commission' slip.id %}" 
                      class="action-btn bg-indigo-500 text-white hover:bg-indigo-600"
-                     title="View Full Breakdown">
-                    <i class="fas fa-chart-line"></i>
+                     title="View Agent-Only Commission">
+                    <i class="fas fa-user"></i>
                   </a>
                 {% else %}
                   <a href="{% url 'commission' slip.id %}" 
-                     class="action-btn bg-green-500 text-white hover:bg-green-600"
-                     title="View Commission">
+                     class="action-btn bg-gray-500 text-white hover:bg-gray-600"
+                     title="View Commission (Legacy)">
                     <i class="fas fa-file-invoice"></i>
                   </a>
                 {% endif %}
@@ -728,7 +966,7 @@
       </div>
       <div class="flex space-x-2">
         {% if commission_slips.has_previous %}
-        <a href="?page={{ commission_slips.previous_page_number }}" 
+        <a href="?page={{ commission_slips.previous_page_number }}{% if selected_team %}&team={{ selected_team }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if selected_developer %}&developer={{ selected_developer }}{% endif %}{% if selected_property %}&property={{ selected_property }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_date_from %}&date_from={{ selected_date_from }}{% endif %}{% if selected_date_to %}&date_to={{ selected_date_to }}{% endif %}" 
            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
           <i class="fas fa-chevron-left"></i>
         </a>
@@ -738,12 +976,12 @@
           {% if commission_slips.number == num %}
             <span class="px-4 py-2 bg-blue-500 text-white rounded-lg">{{ num }}</span>
           {% elif num > commission_slips.number|add:'-3' and num < commission_slips.number|add:'3' %}
-            <a href="?page={{ num }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">{{ num }}</a>
+            <a href="?page={{ num }}{% if selected_team %}&team={{ selected_team }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if selected_developer %}&developer={{ selected_developer }}{% endif %}{% if selected_property %}&property={{ selected_property }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_date_from %}&date_from={{ selected_date_from }}{% endif %}{% if selected_date_to %}&date_to={{ selected_date_to }}{% endif %}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">{{ num }}</a>
           {% endif %}
         {% endfor %}
         
         {% if commission_slips.has_next %}
-        <a href="?page={{ commission_slips.next_page_number }}" 
+        <a href="?page={{ commission_slips.next_page_number }}{% if selected_team %}&team={{ selected_team }}{% endif %}{% if selected_user %}&user={{ selected_user }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if selected_developer %}&developer={{ selected_developer }}{% endif %}{% if selected_property %}&property={{ selected_property }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_date_from %}&date_from={{ selected_date_from }}{% endif %}{% if selected_date_to %}&date_to={{ selected_date_to }}{% endif %}" 
            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
           <i class="fas fa-chevron-right"></i>
         </a>
@@ -1085,13 +1323,16 @@
     };
     
     const teamFilter = document.getElementById('teamFilter');
-    const userFilter = document.getElementById('userFilter');
+    const userFilter = document.getElementById('userFilterId');
     const yearFilter = document.getElementById('yearFilter');
     const monthFilter = document.getElementById('monthFilter');
     const developerFilter = document.getElementById('developerFilter');
     const propertyFilter = document.getElementById('propertyFilter');
     const typeFilter = document.getElementById('typeFilter');
     const statusFilter2 = document.getElementById('statusFilter2');
+    const searchInput = document.getElementById('searchInput');
+    const dateFromInput = document.getElementById('dateFrom');
+    const dateToInput = document.getElementById('dateTo');
     
     setOrDelete('team', teamFilter ? teamFilter.value : '');
     setOrDelete('user', userFilter ? userFilter.value : '');
@@ -1101,6 +1342,9 @@
     setOrDelete('property', propertyFilter ? propertyFilter.value : '');
     setOrDelete('type', typeFilter ? typeFilter.value : '');
     setOrDelete('status', statusFilter2 ? statusFilter2.value : '');
+    setOrDelete('search', searchInput ? searchInput.value : '');
+    setOrDelete('date_from', dateFromInput ? dateFromInput.value : '');
+    setOrDelete('date_to', dateToInput ? dateToInput.value : '');
     url.searchParams.delete('page');
     
     // Update the URL without reloading
@@ -1460,10 +1704,92 @@
 </script>
 
 <script>
+// User Autocomplete functionality
+let userAutocompleteTimeout;
+let currentUserHighlightIndex = -1;
+
+function showUserAutocomplete(query) {
+  const dropdown = document.getElementById('userAutocompleteDropdown');
+  
+  if (query.length < 1) {
+    dropdown.classList.add('hidden');
+    return;
+  }
+  
+  // Show loading
+  dropdown.innerHTML = '<div class="user-autocomplete-loading"><i class="fas fa-spinner fa-spin mr-2"></i>Searching...</div>';
+  dropdown.classList.remove('hidden');
+  
+  // Fetch suggestions
+  fetch(`{% url 'user_filter_autocomplete' %}?q=${encodeURIComponent(query)}`)
+    .then(response => response.json())
+    .then(data => {
+      displayUserSuggestions(data.suggestions);
+    })
+    .catch(error => {
+      console.error('User autocomplete error:', error);
+      dropdown.classList.add('hidden');
+    });
+}
+
+function displayUserSuggestions(suggestions) {
+  const dropdown = document.getElementById('userAutocompleteDropdown');
+  currentUserHighlightIndex = -1;
+  
+  if (suggestions.length === 0) {
+    dropdown.innerHTML = '<div class="user-autocomplete-loading">No users found</div>';
+    return;
+  }
+  
+  const html = suggestions.map((suggestion, index) => `
+    <div class="user-autocomplete-item" data-index="${index}" data-user-id="${suggestion.id}" data-full-name="${suggestion.full_name}">
+      <div class="user-autocomplete-name">${suggestion.full_name}</div>
+      <div class="user-autocomplete-details">${suggestion.role} • ${suggestion.team}</div>
+    </div>
+  `).join('');
+  
+  dropdown.innerHTML = html;
+  
+  // Add click listeners
+  dropdown.querySelectorAll('.user-autocomplete-item').forEach(item => {
+    item.addEventListener('click', function() {
+      selectUserSuggestion(this.dataset.userId, this.dataset.fullName);
+    });
+  });
+}
+
+function selectUserSuggestion(userId, fullName) {
+  document.getElementById('userFilter').value = fullName;
+  document.getElementById('userFilterId').value = userId;
+  document.getElementById('userAutocompleteDropdown').classList.add('hidden');
+  updateFiltersAndCharts();
+}
+
+function highlightUserSuggestion(direction) {
+  const items = document.querySelectorAll('.user-autocomplete-item');
+  if (items.length === 0) return;
+  
+  // Remove current highlight
+  if (currentUserHighlightIndex >= 0) {
+    items[currentUserHighlightIndex].classList.remove('highlighted');
+  }
+  
+  // Update index
+  if (direction === 'down') {
+    currentUserHighlightIndex = (currentUserHighlightIndex + 1) % items.length;
+  } else if (direction === 'up') {
+    currentUserHighlightIndex = currentUserHighlightIndex <= 0 ? items.length - 1 : currentUserHighlightIndex - 1;
+  }
+  
+  // Add new highlight
+  items[currentUserHighlightIndex].classList.add('highlighted');
+}
+
 // Filter bar handlers
 document.addEventListener('DOMContentLoaded', function() {
   const teamFilter = document.getElementById('teamFilter');
   const userFilter = document.getElementById('userFilter');
+  const userFilterId = document.getElementById('userFilterId');
   const yearFilter = document.getElementById('yearFilter');
   const monthFilter = document.getElementById('monthFilter');
   const developerFilter = document.getElementById('developerFilter');
@@ -1471,9 +1797,144 @@ document.addEventListener('DOMContentLoaded', function() {
   const typeFilter = document.getElementById('typeFilter');
   const statusFilter2 = document.getElementById('statusFilter2');
 
-  [teamFilter, userFilter, yearFilter, monthFilter, developerFilter, propertyFilter, typeFilter, statusFilter2]
+  // User autocomplete event listeners
+  if (userFilter) {
+    userFilter.addEventListener('input', function() {
+      clearTimeout(userAutocompleteTimeout);
+      const query = this.value.trim();
+      
+      // Clear the hidden ID when typing
+      if (userFilterId) userFilterId.value = '';
+      
+      userAutocompleteTimeout = setTimeout(() => {
+        showUserAutocomplete(query);
+      }, 300);
+    });
+
+    userFilter.addEventListener('keydown', function(event) {
+      const dropdown = document.getElementById('userAutocompleteDropdown');
+      
+      if (!dropdown.classList.contains('hidden')) {
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          highlightUserSuggestion('down');
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          highlightUserSuggestion('up');
+        } else if (event.key === 'Enter') {
+          event.preventDefault();
+          const highlighted = document.querySelector('.user-autocomplete-item.highlighted');
+          if (highlighted) {
+            selectUserSuggestion(highlighted.dataset.userId, highlighted.dataset.fullName);
+          } else {
+            updateFiltersAndCharts();
+          }
+        } else if (event.key === 'Escape') {
+          dropdown.classList.add('hidden');
+        }
+      } else if (event.key === 'Enter') {
+        updateFiltersAndCharts();
+      }
+    });
+  }
+
+  // Hide autocomplete when clicking outside
+  document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('userAutocompleteDropdown');
+    if (userFilter && dropdown && !userFilter.contains(event.target) && !dropdown.contains(event.target)) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  [teamFilter, yearFilter, monthFilter, developerFilter, propertyFilter, typeFilter, statusFilter2]
     .filter(Boolean)
     .forEach(el => el.addEventListener('change', updateFiltersAndCharts));
+
+  // Search functionality
+  const searchInput = document.getElementById('searchInput');
+  const searchSpinner = document.getElementById('searchSpinner');
+  
+  // Custom date range functionality
+  const dateFromInput = document.getElementById('dateFrom');
+  const dateToInput = document.getElementById('dateTo');
+  const applyDateRangeBtn = document.getElementById('applyDateRange');
+  const clearDateRangeBtn = document.getElementById('clearDateRange');
+
+  // Live search functionality with debouncing
+  let searchTimeout;
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      
+      // Show spinner for visual feedback
+      if (searchSpinner) {
+        searchSpinner.classList.remove('hidden');
+      }
+      
+      // Debounce search to avoid excessive requests
+      searchTimeout = setTimeout(() => {
+        updateFiltersAndCharts();
+        
+        // Hide spinner after search completes
+        if (searchSpinner) {
+          setTimeout(() => {
+            searchSpinner.classList.add('hidden');
+          }, 500);
+        }
+      }, 300); // 300ms delay for live search
+    });
+
+    // Enter key support for immediate search
+    searchInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        clearTimeout(searchTimeout);
+        updateFiltersAndCharts();
+        
+        // Hide spinner immediately on Enter
+        if (searchSpinner) {
+          searchSpinner.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  // Add clear functionality to search input (double-click to clear)
+  if (searchInput) {
+    searchInput.addEventListener('dblclick', function() {
+      this.value = '';
+      clearTimeout(searchTimeout);
+      updateFiltersAndCharts();
+      
+      // Hide spinner
+      if (searchSpinner) {
+        searchSpinner.classList.add('hidden');
+      }
+    });
+  }
+
+  // Custom date range functionality
+  if (applyDateRangeBtn) {
+    applyDateRangeBtn.addEventListener('click', function() {
+      // Validate date range
+      const fromDate = dateFromInput ? dateFromInput.value : '';
+      const toDate = dateToInput ? dateToInput.value : '';
+      
+      if (fromDate && toDate && fromDate > toDate) {
+        alert('From date cannot be later than To date.');
+        return;
+      }
+      
+      updateFiltersAndCharts();
+    });
+  }
+
+  if (clearDateRangeBtn) {
+    clearDateRangeBtn.addEventListener('click', function() {
+      if (dateFromInput) dateFromInput.value = '';
+      if (dateToInput) dateToInput.value = '';
+      updateFiltersAndCharts();
+    });
+  }
 });
 </script>
 

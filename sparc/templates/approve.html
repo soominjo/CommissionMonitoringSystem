@@ -63,14 +63,109 @@
         opacity: 1;
     }
     
-    /* Mobile optimizations */
+    /* Mobile optimizations - ENHANCED */
     @media (max-width: 768px) {
+        /* Hide sidebar and navigation elements */
+        .sidebar,
+        .burger-menu,
+        .nav-toggle,
+        .mobile-menu-toggle,
+        .sidebar-overlay,
+        .navigation-sidebar {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Ensure main content takes full width */
+        .main-content,
+        .content-wrapper,
+        body,
+        .container {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        
+        /* Reset any sidebar-related margins/padding */
+        .page-wrapper {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+        }
+        
+        /* Mobile-specific layout adjustments */
         .user-card:hover {
             transform: none;
         }
         
         .grid-cols-1 {
             grid-template-columns: 1fr;
+        }
+        
+        /* Ensure proper spacing on mobile */
+        .min-h-screen {
+            padding: 1rem !important;
+        }
+        
+        /* Stack header elements vertically on mobile */
+        .mb-8.flex.flex-col.md\\:flex-row {
+            flex-direction: column !important;
+            gap: 1rem !important;
+        }
+        
+        /* Make action buttons stack properly */
+        .flex.flex-col.sm\\:flex-row.gap-4 {
+            flex-direction: column !important;
+            width: 100% !important;
+        }
+        
+        .flex.flex-col.sm\\:flex-row.gap-4 a {
+            width: 100% !important;
+            text-align: center !important;
+        }
+        
+        /* Responsive grid adjustments */
+        .grid.grid-cols-1.sm\\:grid-cols-2 {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
+            grid-template-columns: 1fr !important;
+        }
+        
+        /* Modal adjustments for mobile */
+        .modal-content {
+            margin: 1rem !important;
+            max-width: calc(100vw - 2rem) !important;
+        }
+        
+        /* Filter dropdown adjustments */
+        .relative.w-full.sm\\:w-64 {
+            width: 100% !important;
+        }
+    }
+    
+    /* Extra small screens */
+    @media (max-width: 480px) {
+        .text-2xl.md\\:text-3xl {
+            font-size: 1.5rem !important;
+        }
+        
+        .p-4.md\\:p-8 {
+            padding: 1rem !important;
+        }
+        
+        .gap-6 {
+            gap: 1rem !important;
+        }
+        
+        .px-5.py-3 {
+            padding: 0.75rem 1rem !important;
         }
     }
     
@@ -107,6 +202,74 @@
     .action-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Mobile-first responsive design */
+    @media (max-width: 768px) {
+        .action-btn:hover {
+            transform: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    }
+    
+    /* Autocomplete styles */
+    .autocomplete-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.2s ease;
+    }
+    
+    .autocomplete-item:hover,
+    .autocomplete-item.highlighted {
+        background-color: #f8fafc;
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    .autocomplete-username {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .autocomplete-details {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    
+    .autocomplete-loading {
+        padding: 12px 16px;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+    
+    /* Enhanced search button styles */
+    #searchButton {
+        min-width: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    #searchButton:hover {
+        background-color: #f3f4f6;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    #searchButton:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Ensure input and button alignment */
+    .search-container {
+        display: flex;
+        align-items: stretch;
     }
 </style>
 
@@ -187,10 +350,6 @@
                 </div>
             </div>
 
-  
-  
-    
-
             {% if user.is_superuser or user.is_staff %}
             <!-- Staff (Superuser only) -->
             <div class="bg-white gradient-bg shadow-lg p-6 rounded-2xl border-l-4 border-yellow-500">
@@ -206,23 +365,20 @@
             </div>
             {% endif %}
 
-
-                      <!-- Total Users -->
-                      <div class="bg-white gradient-bg shadow-lg p-6 rounded-2xl border-l-4 border-gray-500">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h3 class="text-lg font-medium text-gray-800">Total Users</h3>
-                                <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_users_count }}</p>
-                            </div>
-                            <div class="bg-gray-100 p-3 rounded-full">
-                                <i class="fas fa-users text-gray-600 text-xl"></i>
-                            </div>
-                        </div>
+            <!-- Total Users -->
+            <div class="bg-white gradient-bg shadow-lg p-6 rounded-2xl border-l-4 border-gray-500">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-800">Total Users</h3>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">{{ total_users_count }}</p>
                     </div>
+                    <div class="bg-gray-100 p-3 rounded-full">
+                        <i class="fas fa-users text-gray-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        
-        
         <!-- Permission Info -->
         <div class="mb-8 p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div class="flex">
@@ -252,103 +408,155 @@
             </div>
         </div>
 
-
-            
-            {% if unapproved_accounts %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for profile in unapproved_accounts %}
-                <div class="user-card bg-white rounded-2xl overflow-hidden border border-gray-200 animate-fade-in" data-team-name="{{ profile.team.name }}">
-                    <div class="p-6">
-                        <div class="flex items-center mb-4">
-                            <img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" 
-                                 src="{{ profile.image.url }}" 
-                                 alt="{{ profile.user.username }}'s avatar">
-                            <div class="ml-4">
-                                <h3 class="font-bold text-gray-800">{{ profile.user.username }}</h3>
-                                <p class="text-sm text-gray-600">{{ profile.user.email }}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="status-badge px-3 py-1 text-xs font-semibold rounded-full 
-                                {% if profile.role == 'Sales Manager' %}role-manager
-                                {% elif profile.role == 'Sales Supervisor' %}role-supervisor
-                                {% else %}role-agent{% endif %}">
-                                {{ profile.role }}
-                            </span>
-                            
-                            <span class="team-badge px-3 py-1 text-xs font-semibold rounded-full">
-                                {{ profile.team.display_name }}
-                            </span>
-                        </div>
-                        
-                        <div class="text-sm text-gray-700 mb-4">
-                            <div class="flex items-center mb-1">
-                                <i class="fas fa-phone text-gray-500 mr-2 w-4"></i>
-                                <span>{{ profile.phone_number|default:"No phone" }}</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-calendar text-gray-500 mr-2 w-4"></i>
-                                <span>Joined {{ profile.user.date_joined|date:"M d, Y" }}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="flex flex-wrap gap-2">
-                            {% if user.is_superuser or user.profile and user.profile.team == profile.team %}
-                            <a href="{% url 'approve_user' profile.id %}" 
-                               class="action-btn flex-1 text-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-all">
-                                <i class="fas fa-check mr-1"></i> Approve
-                            </a>
-                            
-                            <a href="{% url 'reject_user' profile.id %}" 
-                               class="action-btn flex-1 text-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-all">
-                                <i class="fas fa-times mr-1"></i> Reject
-                            </a>
-                            {% else %}
-                            <span class="text-sm text-gray-500 italic">Different team</span>
-                            {% endif %}
+        {% if unapproved_accounts %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for profile in unapproved_accounts %}
+            <div class="user-card bg-white rounded-2xl overflow-hidden border border-gray-200 animate-fade-in" data-team-name="{{ profile.team.name }}">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" 
+                             src="{{ profile.image.url }}" 
+                             alt="{{ profile.user.username }}'s avatar">
+                        <div class="ml-4">
+                            <h3 class="font-bold text-gray-800">{{ profile.user.username }}</h3>
+                            <p class="text-sm text-gray-600">{{ profile.user.email }}</p>
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-            </div>          
-            {% endif %}
-        </div>
-        
-        {% if user.is_superuser %}
-        <!-- Team Filter -->
-        <div class="mb-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h2 class="text-xl font-semibold text-gray-800">Team Members</h2>
-                    <p class="text-sm text-gray-500 mt-1">Filter by team to view members</p>
-                </div>
-                
-                <div class="relative w-full sm:w-64">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="status-badge px-3 py-1 text-xs font-semibold rounded-full 
+                            {% if profile.role == 'Sales Manager' %}role-manager
+                            {% elif profile.role == 'Sales Supervisor' %}role-supervisor
+                            {% else %}role-agent{% endif %}">
+                            {{ profile.role }}
+                        </span>
+                        
+                        <span class="team-badge px-3 py-1 text-xs font-semibold rounded-full">
+                            {{ profile.team.display_name }}
+                        </span>
                     </div>
                     
-                    <select id="teamFilter" 
-                            class="appearance-none w-full pl-10 pr-10 py-3 text-base border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer">
-                        <option value="all">All Teams</option>
-                        {% for team in teams %}
-                            <option value="{{ team.name }}">{{ team.display_name }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="text-sm text-gray-700 mb-4">
+                        <div class="flex items-center mb-1">
+                            <i class="fas fa-phone text-gray-500 mr-2 w-4"></i>
+                            <span>{{ profile.phone_number|default:"No phone" }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar text-gray-500 mr-2 w-4"></i>
+                            <span>Joined {{ profile.user.date_joined|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
                     
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
+                    <div class="flex flex-wrap gap-2">
+                        {% if user.is_superuser or user.profile and user.profile.team == profile.team %}
+                        <a href="{% url 'approve_user' profile.id %}" 
+                           class="action-btn flex-1 text-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-all">
+                            <i class="fas fa-check mr-1"></i> Approve
+                        </a>
+                        
+                        <a href="{% url 'reject_user' profile.id %}" 
+                           class="action-btn flex-1 text-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-all">
+                            <i class="fas fa-times mr-1"></i> Reject
+                        </a>
+                        {% else %}
+                        <span class="text-sm text-gray-500 italic">Different team</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-        </div>
+            {% endfor %}
+        </div>          
         {% endif %}
+
+        <br>
+        
+        <!-- Filters Section -->
+        <div class="mb-8">
+            <div class="flex flex-col gap-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800">Filter Users</h2>
+                    <p class="text-sm text-gray-500 mt-1">Use filters to find specific users</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Name Filter with Autocomplete and Search Button -->
+                    <div class="relative">
+                        <div class="flex">
+                            <div class="relative flex-1">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 z-10">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" 
+                                       id="nameFilter" 
+                                       placeholder="Search by name..."
+                                       value="{{ selected_name }}"
+                                       autocomplete="off"
+                                       class="w-full pl-10 pr-4 py-3 text-base border border-gray-300 rounded-l-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white hover:bg-gray-50 focus:z-10">
+                            </div>
+                            
+                            <!-- Search Button -->
+                            <button type="button" 
+                                    id="searchButton"
+                                    class="px-4 py-3 bg-gray-100 hover:bg-gray-200 border border-l-0 border-gray-300 rounded-r-lg shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 group">
+                                <i class="fas fa-search text-gray-500 group-hover:text-gray-700 transition-colors duration-200"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Autocomplete Dropdown -->
+                        <div id="autocompleteDropdown" 
+                             class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto hidden">
+                            <!-- Suggestions will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Role Filter -->
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <i class="fas fa-user-tag text-gray-400"></i>
+                        </div>
+                        <select id="roleFilter" 
+                                class="appearance-none w-full pl-10 pr-10 py-3 text-base border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer">
+                            <option value="">All Roles</option>
+                            <option value="Sales Manager" {% if selected_role == 'Sales Manager' %}selected{% endif %}>Sales Manager</option>
+                            <option value="Sales Supervisor" {% if selected_role == 'Sales Supervisor' %}selected{% endif %}>Sales Supervisor</option>
+                            <option value="Sales Agent" {% if selected_role == 'Sales Agent' %}selected{% endif %}>Sales Agent</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Filter -->
+                    {% if user.is_superuser %}
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <i class="fas fa-users text-gray-400"></i>
+                        </div>
+                        <select id="teamFilter" 
+                                class="appearance-none w-full pl-10 pr-10 py-3 text-base border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white hover:bg-gray-50 cursor-pointer">
+                            <option value="">All Teams</option>
+                            {% for team in teams %}
+                                <option value="{{ team.name }}" {% if selected_team == team.name %}selected{% endif %}>{{ team.display_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Live Filter Info -->
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Filters apply automatically as you type or select options
+                </div>
+            </div>
+        </div>
 
         <!-- Approved Users Section -->
         <div class="mb-12">
@@ -442,7 +650,7 @@
             <div class="mt-8 flex justify-center">
                 <div class="flex items-center space-x-2">
                     {% if approved_accounts.has_previous %}
-                    <a href="?page={{ approved_accounts.previous_page_number }}" 
+                    <a href="?page={{ approved_accounts.previous_page_number }}{% if selected_name %}&name={{ selected_name }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}{% if selected_team %}&team={{ selected_team }}{% endif %}" 
                        class="px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition">
                         Previous
                     </a>
@@ -453,7 +661,7 @@
                     </span>
                     
                     {% if approved_accounts.has_next %}
-                    <a href="?page={{ approved_accounts.next_page_number }}"
+                    <a href="?page={{ approved_accounts.next_page_number }}{% if selected_name %}&name={{ selected_name }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}{% if selected_team %}&team={{ selected_team }}{% endif %}"
                        class="px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition">
                         Next
                     </a>
@@ -690,18 +898,158 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-document.getElementById('teamFilter').addEventListener('change', function() {
-    const selectedTeam = this.value;
-    const userCards = document.querySelectorAll('.user-card');
+// Autocomplete and Live Filtering
+let autocompleteTimeout;
+let currentHighlightIndex = -1;
 
-    userCards.forEach(card => {
-        const teamName = card.dataset.teamName;
-        if (selectedTeam === 'all' || teamName === selectedTeam) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
+// Live filter function
+function applyLiveFilters() {
+    const nameFilter = document.getElementById('nameFilter').value.trim();
+    const roleFilter = document.getElementById('roleFilter').value;
+    const teamFilter = document.getElementById('teamFilter') ? document.getElementById('teamFilter').value : '';
+    
+    // Build URL with filters
+    const params = new URLSearchParams();
+    if (nameFilter) params.set('name', nameFilter);
+    if (roleFilter) params.set('role', roleFilter);
+    if (teamFilter) params.set('team', teamFilter);
+    
+    // Redirect with filters
+    window.location.href = '?' + params.toString();
+}
+
+// Autocomplete functionality
+function showAutocomplete(query) {
+    const dropdown = document.getElementById('autocompleteDropdown');
+    
+    if (query.length < 1) {
+        dropdown.classList.add('hidden');
+        return;
+    }
+    
+    // Show loading
+    dropdown.innerHTML = '<div class="autocomplete-loading"><i class="fas fa-spinner fa-spin mr-2"></i>Searching...</div>';
+    dropdown.classList.remove('hidden');
+    
+    // Fetch suggestions
+    fetch(`{% url 'user_autocomplete' %}?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            displaySuggestions(data.suggestions);
+        })
+        .catch(error => {
+            console.error('Autocomplete error:', error);
+            dropdown.classList.add('hidden');
+        });
+}
+
+function displaySuggestions(suggestions) {
+    const dropdown = document.getElementById('autocompleteDropdown');
+    currentHighlightIndex = -1;
+    
+    if (suggestions.length === 0) {
+        dropdown.innerHTML = '<div class="autocomplete-loading">No users found</div>';
+        return;
+    }
+    
+    const html = suggestions.map((suggestion, index) => `
+        <div class="autocomplete-item" data-index="${index}" data-username="${suggestion.username}">
+            <div class="autocomplete-username">${suggestion.username}</div>
+            <div class="autocomplete-details">${suggestion.role} • ${suggestion.team}</div>
+        </div>
+    `).join('');
+    
+    dropdown.innerHTML = html;
+    
+    // Add click listeners
+    dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', function() {
+            selectSuggestion(this.dataset.username);
+        });
     });
+}
+
+function selectSuggestion(username) {
+    document.getElementById('nameFilter').value = username;
+    document.getElementById('autocompleteDropdown').classList.add('hidden');
+    applyLiveFilters();
+}
+
+function highlightSuggestion(direction) {
+    const items = document.querySelectorAll('.autocomplete-item');
+    if (items.length === 0) return;
+    
+    // Remove current highlight
+    if (currentHighlightIndex >= 0) {
+        items[currentHighlightIndex].classList.remove('highlighted');
+    }
+    
+    // Update index
+    if (direction === 'down') {
+        currentHighlightIndex = (currentHighlightIndex + 1) % items.length;
+    } else if (direction === 'up') {
+        currentHighlightIndex = currentHighlightIndex <= 0 ? items.length - 1 : currentHighlightIndex - 1;
+    }
+    
+    // Add new highlight
+    items[currentHighlightIndex].classList.add('highlighted');
+}
+
+// Event listeners
+document.getElementById('nameFilter').addEventListener('input', function() {
+    clearTimeout(autocompleteTimeout);
+    const query = this.value.trim();
+    
+    autocompleteTimeout = setTimeout(() => {
+        showAutocomplete(query);
+    }, 300);
+});
+
+document.getElementById('nameFilter').addEventListener('keydown', function(event) {
+    const dropdown = document.getElementById('autocompleteDropdown');
+    
+    if (!dropdown.classList.contains('hidden')) {
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            highlightSuggestion('down');
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            highlightSuggestion('up');
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            const highlighted = document.querySelector('.autocomplete-item.highlighted');
+            if (highlighted) {
+                selectSuggestion(highlighted.dataset.username);
+            } else {
+                applyLiveFilters();
+            }
+        } else if (event.key === 'Escape') {
+            dropdown.classList.add('hidden');
+        }
+    } else if (event.key === 'Enter') {
+        applyLiveFilters();
+    }
+});
+
+// Hide autocomplete when clicking outside
+document.addEventListener('click', function(event) {
+    const nameFilter = document.getElementById('nameFilter');
+    const dropdown = document.getElementById('autocompleteDropdown');
+    
+    if (!nameFilter.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.classList.add('hidden');
+    }
+});
+
+// Live filtering for dropdowns
+document.getElementById('roleFilter').addEventListener('change', applyLiveFilters);
+if (document.getElementById('teamFilter')) {
+    document.getElementById('teamFilter').addEventListener('change', applyLiveFilters);
+}
+
+// Search button functionality
+document.getElementById('searchButton').addEventListener('click', function() {
+    applyLiveFilters();
 });
 </script>
 {% endblock %}

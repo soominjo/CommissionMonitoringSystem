@@ -164,37 +164,97 @@
         <p><strong>Buyer:</strong> {{ slip.buyer_name }}</p>
         <p><strong>Project Name:</strong> {{ slip.project_name }}</p>
         <p><strong>Unit ID:</strong> {{ slip.unit_id }}</p>
+        <p><strong>Commission Rate:</strong> {{ display_commission_rate|floatformat:2 }}%</p>
         <p><strong>Total Selling Price:</strong> ₱{{ slip.total_selling_price|floatformat:0|intcomma }}</p>    
         {% with cash_advance_after_tax=slip.cash_advance|multiply:90 %}
         <p><strong>Cash Advance (less 10% tax):</strong> ₱{{ cash_advance_after_tax|floatformat:0|intcomma }}</p>
         {% endwith %}
-
+        
+        <p><strong>Particulars:</strong> {{ display_particulars }}</p>
        
         {% for detail in details %}
         {% if forloop.first %}
-        
-            <p><strong>Particulars:</strong> {{ detail.particulars }}</p>
             {% if detail.particulars == 'PARTIAL COMM' %}
-     
-                <p><strong>Percentage:</strong> {{ detail.partial_percentage|floatformat:0 }}%</p>
+                <p><strong>Percentage:</strong> 
+                    {% if detail.percentage_of_particulars %}
+                        {{ detail.percentage_of_particulars|floatformat:0 }}%
+                    {% else %}
+                        {{ detail.partial_percentage|floatformat:0 }}%
+                    {% endif %}
+                </p>
+            {% elif detail.particulars == 'FULL COMM' %}
+                <p><strong>Percentage:</strong> 
+                    {% if detail.percentage_of_particulars %}
+                        {{ detail.percentage_of_particulars|floatformat:0 }}%
+                    {% else %}
+                        100%
+                    {% endif %}
+                </p>
             {% endif %}
             {% if detail.particulars == 'INCENTIVES' %}
                 <p><strong>Additional Incentive:</strong> ₱{{ slip.incentive_amount|floatformat:0|intcomma }}</p>
             {% endif %}
         {% endif %}
-    {% endfor %}
+        {% endfor %}
+    
+        <!-- VAT and Tax Information -->
+        {% if slip.vat_rate %}
+        <p><strong>VAT Rate:</strong> {{ slip.vat_rate|floatformat:2 }}%</p>
+        {% endif %}
+        {% if slip.withholding_tax_percentage %}
+        <p><strong>Withholding Tax Rate:</strong> {{ slip.withholding_tax_percentage|floatformat:2 }}%</p>
+        {% endif %}
         
     </div>
+    
+    <!-- VAT-Compliant Commission Calculation Display -->
+    {% if slip.vat_rate or slip.withholding_tax_percentage %}
+    <div class="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h3 class="text-lg font-medium text-gray-700 mb-4 flex items-center">
+            <i class="fas fa-calculator mr-2 text-blue-500"></i>VAT-Compliant Commission Calculation
+        </h3>
+        
+        <!-- Step-by-Step Calculation Display -->
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between items-center py-1 border-b border-gray-200">
+                <span class="text-gray-700">1. Total Commission Rate:</span>
+                <span class="font-semibold text-gray-900">{{ display_commission_rate|floatformat:2 }}%</span>
+            </div>
+            
+            <div class="flex justify-between items-center py-1 border-b border-gray-200">
+                <span class="text-gray-700">2. Total Gross Commission:</span>
+                <span class="font-semibold text-gray-900">₱{{ total_gross_commission|floatformat:2|intcomma }}</span>
+            </div>
+            
+            <div class="flex justify-between items-center py-1 border-b border-gray-200">
+                <span class="text-gray-700">3. VATABLE Amount:</span>
+                <span class="font-semibold text-gray-900">₱{{ vatable_amount|floatformat:2|intcomma }}</span>
+            </div>
+            
+            <div class="flex justify-between items-center py-1 border-b border-gray-200">
+                <span class="text-gray-700">4. Total Tax Deductions:</span>
+                <span class="font-semibold text-gray-900">₱{{ total_tax_deductions|floatformat:2|intcomma }}</span>
+            </div>
+        </div>
+        
+        <!-- Final Net Commission -->
+        <div class="border-t-2 border-gray-300 pt-3 mt-3">
+            <div class="flex justify-between items-center">
+                <span class="text-lg font-semibold text-gray-800">NET COMMISSION (Final Payable Amount):</span>
+                <span class="text-xl font-bold text-gray-900">₱{{ final_net_commission|floatformat:2|intcomma }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     <table class="w-full mt-6 border border-gray-300 text-sm text-gray-700 text-center">
         <thead class="bg-blue-500 text-white text-center">
             <tr>
                 <th class="p-2 border">Position</th>
-                <th class="p-2 border">Name</th>
-
+                <th class="p-2 border">Particulars</th>
                 <th class="p-2 border">Commission Rate</th>
                 <th class="p-2 border">Gross Commission</th>
-                <th class="p-2 border">Withholding Tax</th>
+                <th class="p-2 border">VAT & EWT</th>
                 <th class="p-2 border">Net Commission</th>
             </tr>
         </thead>
@@ -212,22 +272,68 @@
                         {{ detail.role }}
                     {% endif %}
                 </td>
-                <td class="p-2 border">{{ detail.agent_name }}</td>
-
+                <td class="p-2 border">
+                    {% if detail.particulars == 'PARTIAL COMM' %}
+                        {% if detail.percentage_of_particulars %}
+                            {{ detail.percentage_of_particulars|floatformat:0 }}% COMM
+                        {% else %}
+                            {{ detail.partial_percentage|floatformat:0 }}% COMM
+                        {% endif %}
+                    {% elif detail.particulars == 'INCENTIVES' %}
+                        INCENTIVES
+                    {% else %}
+                        {% if detail.percentage_of_particulars %}
+                            {{ detail.percentage_of_particulars|floatformat:0 }}% COMM
+                        {% else %}
+                            100% COMM
+                        {% endif %}
+                    {% endif %}
+                </td>
                 <td class="p-2 border text-center">{{ detail.commission_rate|floatformat:2 }}%</td>
-                <td class="p-2 border">₱{{ detail.gross_commission|floatformat:2|intcomma }}</td>
-              
-                <td class="p-2 border">₱{{ detail.withholding_tax|floatformat:2|intcomma }}</td>
-                <td class="p-2 border">₱{{ detail.net_commission|floatformat:2|intcomma }}</td>
+                <td class="p-2 border">
+                    <div class="editable-gross-commission" data-detail-id="{{ detail.id }}" data-commission-type="commission3">
+                        <span class="gross-commission-display">₱{{ detail.gross_commission|floatformat:2|intcomma }}</span>
+                        {% if user.is_superuser %}
+                        <input type="number" 
+                               class="gross-commission-input hidden w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                               value="{{ detail.gross_commission|floatformat:2 }}" 
+                               step="0.01" 
+                               min="0">
+                        <button class="edit-gross-commission-btn text-blue-600 hover:text-blue-800 ml-2 text-xs" title="Edit Gross Commission">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="p-2 border">
+                    <span class="withholding-tax-display" data-detail-id="{{ detail.id }}">₱{{ detail.withholding_tax|floatformat:2|intcomma }}</span>
+                </td>
+                <td class="p-2 border">
+                    <span class="net-commission-display" data-detail-id="{{ detail.id }}">₱{{ detail.net_commission|floatformat:2|intcomma }}</span>
+                </td>
             </tr>
             {% endfor %}
             
             {% if user.is_staff or user.is_superuser or user.profile.role == 'Sales Manager' or user.profile.role == 'Sales Supervisor' %}
             <tr class="bg-gray-50 font-semibold">
                 <td colspan="3" class="p-2 border text-right">Total:</td>
-                <td class="p-2 border">₱{{ total_gross|floatformat:2|intcomma }}</td>
-                <td class="p-2 border">₱{{ total_tax|floatformat:2|intcomma }}</td>
-                <td class="p-2 border">₱{{ total_net|floatformat:2|intcomma }}</td>
+                <td class="p-2 border">
+                    <div class="editable-total-gross-commission inline-flex items-center justify-center">
+                        <span class="total-gross-commission-display">₱{{ total_gross|floatformat:2|intcomma }}</span>
+                        {% if user.is_superuser %}
+                        <input type="number" 
+                               class="total-gross-commission-input hidden w-32 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center font-bold" 
+                               value="{{ total_gross|floatformat:2 }}" 
+                               step="0.01" 
+                               min="0">
+                        <button class="edit-total-gross-commission-btn text-blue-600 hover:text-blue-800 ml-2 text-xs" title="Edit Total Gross Commission">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="p-2 border total-tax-display">₱{{ total_tax|floatformat:2|intcomma }}</td>
+                <td class="p-2 border total-net-display">₱{{ total_net|floatformat:2|intcomma }}</td>
             </tr>
             {% endif %}
         </tbody>
@@ -377,6 +483,191 @@
         document.getElementById('signature-upload').value = '';
     }
     
+    // Gross Commission Editing Functions
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-PH', {
+            style: 'currency',
+            currency: 'PHP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount).replace('PHP', '₱');
+    }
+
+    function updateGrossCommission(detailId, newGrossCommission, commissionType) {
+        const csrftoken = getCookie('csrftoken');
+        
+        console.log('Making AJAX request with:', {
+            detail_id: detailId,
+            gross_commission: newGrossCommission,
+            commission_type: commissionType
+        });
+        
+        fetch('/update-gross-commission/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                'detail_id': detailId,
+                'gross_commission': newGrossCommission,
+                'commission_type': commissionType
+            })
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.status === 'success') {
+                // Update the display values
+                const grossDisplay = document.querySelector(`[data-detail-id="${detailId}"] .gross-commission-display`);
+                const taxDisplay = document.querySelector(`.withholding-tax-display[data-detail-id="${detailId}"]`);
+                const netDisplay = document.querySelector(`.net-commission-display[data-detail-id="${detailId}"]`);
+                
+                if (grossDisplay) grossDisplay.textContent = formatCurrency(data.data.gross_commission);
+                if (taxDisplay) taxDisplay.textContent = formatCurrency(data.data.withholding_tax);
+                if (netDisplay) netDisplay.textContent = formatCurrency(data.data.net_commission);
+                
+                // Recalculate totals
+                recalculateTotals();
+                
+                // Show success message
+                showMessage('Commission updated successfully!', 'success');
+            } else {
+                showMessage(data.message || 'Error updating commission', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('AJAX Error:', error);
+            showMessage('Network error: ' + error.message, 'error');
+        });
+    }
+
+    function recalculateTotals() {
+        let totalGross = 0;
+        let totalTax = 0;
+        let totalNet = 0;
+        
+        document.querySelectorAll('.gross-commission-display').forEach(display => {
+            const value = parseFloat(display.textContent.replace(/[₱,]/g, '')) || 0;
+            totalGross += value;
+        });
+        
+        document.querySelectorAll('.withholding-tax-display').forEach(display => {
+            const value = parseFloat(display.textContent.replace(/[₱,]/g, '')) || 0;
+            totalTax += value;
+        });
+        
+        document.querySelectorAll('.net-commission-display').forEach(display => {
+            const value = parseFloat(display.textContent.replace(/[₱,]/g, '')) || 0;
+            totalNet += value;
+        });
+        
+        // Update total row displays
+        const totalGrossDisplay = document.querySelector('.total-gross-commission-display');
+        const totalTaxDisplay = document.querySelector('.total-tax-display');
+        const totalNetDisplay = document.querySelector('.total-net-display');
+        
+        if (totalGrossDisplay) totalGrossDisplay.textContent = formatCurrency(totalGross);
+        if (totalTaxDisplay) totalTaxDisplay.textContent = formatCurrency(totalTax);
+        if (totalNetDisplay) totalNetDisplay.textContent = formatCurrency(totalNet);
+        
+        // Update hidden input if exists
+        const totalInput = document.querySelector('.total-gross-commission-input');
+        if (totalInput) totalInput.value = totalGross.toFixed(2);
+    }
+
+    function updateTotalGrossCommission(newTotalGross) {
+        const csrftoken = getCookie('csrftoken');
+        
+        // Collect all detail IDs and commission rates
+        const details = [];
+        document.querySelectorAll('.editable-gross-commission').forEach(container => {
+            const detailId = container.dataset.detailId;
+            const rateCell = container.closest('tr').querySelector('td:nth-child(3)');
+            const commissionRate = parseFloat(rateCell.textContent.replace('%', '')) || 0;
+            
+            if (commissionRate > 0) {
+                details.push({
+                    detail_id: detailId,
+                    commission_rate: commissionRate
+                });
+            }
+        });
+        
+        console.log('Updating total gross commission:', {
+            new_total: newTotalGross,
+            details: details
+        });
+        
+        fetch('/update-total-gross-commission/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                'new_total_gross': newTotalGross,
+                'details': details,
+                'commission_type': 'commission3'
+            })
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.status === 'success') {
+                // Update all individual gross commissions
+                data.data.updated_details.forEach(detail => {
+                    const grossDisplay = document.querySelector(`[data-detail-id="${detail.detail_id}"] .gross-commission-display`);
+                    const taxDisplay = document.querySelector(`.withholding-tax-display[data-detail-id="${detail.detail_id}"]`);
+                    const netDisplay = document.querySelector(`.net-commission-display[data-detail-id="${detail.detail_id}"]`);
+                    
+                    if (grossDisplay) grossDisplay.textContent = formatCurrency(detail.gross_commission);
+                    if (taxDisplay) taxDisplay.textContent = formatCurrency(detail.withholding_tax);
+                    if (netDisplay) netDisplay.textContent = formatCurrency(detail.net_commission);
+                    
+                    // Update hidden input values
+                    const input = document.querySelector(`[data-detail-id="${detail.detail_id}"] .gross-commission-input`);
+                    if (input) input.value = detail.gross_commission.toFixed(2);
+                });
+                
+                // Recalculate totals
+                recalculateTotals();
+                
+                // Show success message
+                showMessage('Total Gross Commission updated successfully! Redistributed among Sales Agent, Sales Supervisor, and Sales Manager.', 'success');
+            } else {
+                showMessage(data.message || 'Error updating total gross commission', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('AJAX Error:', error);
+            showMessage('Network error: ' + error.message, 'error');
+        });
+    }
+
+    function showMessage(message, type) {
+        // Create a temporary message element
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `fixed top-4 right-4 px-4 py-2 rounded-lg z-50 ${
+            type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`;
+        messageDiv.textContent = message;
+        document.body.appendChild(messageDiv);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 3000);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('printable-content');
         const hasSignature = container.dataset.hasSignature === 'true';
@@ -384,6 +675,150 @@
             document.getElementById('attach-signature-btn').style.display = 'none';
         } else {
              document.getElementById('attach-signature-btn').style.display = 'inline-flex';
+        }
+        
+        // Initialize gross commission editing
+        document.querySelectorAll('.edit-gross-commission-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const container = this.closest('.editable-gross-commission');
+                const display = container.querySelector('.gross-commission-display');
+                const input = container.querySelector('.gross-commission-input');
+                
+                // Switch to edit mode
+                display.classList.add('hidden');
+                input.classList.remove('hidden');
+                input.focus();
+                input.select();
+                this.style.display = 'none';
+                
+                // Handle input events
+                const handleSave = () => {
+                    const inputValue = input.value.trim();
+                    if (!inputValue || inputValue === '') {
+                        showMessage('Please enter a gross commission amount', 'error');
+                        return;
+                    }
+                    
+                    const newValue = parseFloat(inputValue);
+                    if (isNaN(newValue) || newValue < 0) {
+                        showMessage('Please enter a valid positive number', 'error');
+                        return;
+                    }
+                    
+                    // Round to 2 decimal places to match Decimal precision
+                    const roundedValue = Math.round(newValue * 100) / 100;
+                    
+                    const detailId = container.dataset.detailId;
+                    const commissionType = container.dataset.commissionType;
+                    
+                    console.log('Detail ID:', detailId, 'Commission Type:', commissionType, 'New Value:', newValue);
+                    
+                    updateGrossCommission(detailId, roundedValue, commissionType);
+                    
+                    // Switch back to display mode
+                    display.classList.remove('hidden');
+                    input.classList.add('hidden');
+                    button.style.display = 'inline-block';
+                };
+                
+                const handleCancel = () => {
+                    // Reset input value and switch back to display mode
+                    input.value = parseFloat(display.textContent.replace(/[₱,]/g, ''));
+                    display.classList.remove('hidden');
+                    input.classList.add('hidden');
+                    button.style.display = 'inline-block';
+                };
+                
+                // Save on Enter, cancel on Escape
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        handleSave();
+                    } else if (e.key === 'Escape') {
+                        handleCancel();
+                    }
+                });
+                
+                // Save on blur
+                input.addEventListener('blur', handleSave);
+            });
+        });
+        
+        // Initialize total gross commission editing
+        const editTotalButton = document.querySelector('.edit-total-gross-commission-btn');
+        if (editTotalButton) {
+            editTotalButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                const container = this.closest('.editable-total-gross-commission');
+                const display = container.querySelector('.total-gross-commission-display');
+                const input = container.querySelector('.total-gross-commission-input');
+                
+                // Switch to edit mode
+                display.classList.add('hidden');
+                input.classList.remove('hidden');
+                input.focus();
+                input.select();
+                this.style.display = 'none';
+                
+                // Handle input events
+                const handleSave = () => {
+                    const inputValue = input.value.trim();
+                    if (!inputValue || inputValue === '') {
+                        showMessage('Please enter a total gross commission amount', 'error');
+                        // Reset and cancel
+                        input.value = parseFloat(display.textContent.replace(/[₱,]/g, ''));
+                        display.classList.remove('hidden');
+                        input.classList.add('hidden');
+                        editTotalButton.style.display = 'inline-block';
+                        return;
+                    }
+                    
+                    const newValue = parseFloat(inputValue);
+                    if (isNaN(newValue) || newValue < 0) {
+                        showMessage('Please enter a valid positive number', 'error');
+                        // Reset and cancel
+                        input.value = parseFloat(display.textContent.replace(/[₱,]/g, ''));
+                        display.classList.remove('hidden');
+                        input.classList.add('hidden');
+                        editTotalButton.style.display = 'inline-block';
+                        return;
+                    }
+                    
+                    // Round to 2 decimal places to match Decimal precision
+                    const roundedValue = Math.round(newValue * 100) / 100;
+                    
+                    console.log('New Total Gross Commission:', roundedValue);
+                    
+                    updateTotalGrossCommission(roundedValue);
+                    
+                    // Switch back to display mode
+                    display.classList.remove('hidden');
+                    input.classList.add('hidden');
+                    editTotalButton.style.display = 'inline-block';
+                };
+                
+                const handleCancel = () => {
+                    // Reset input value and switch back to display mode
+                    input.value = parseFloat(display.textContent.replace(/[₱,]/g, ''));
+                    display.classList.remove('hidden');
+                    input.classList.add('hidden');
+                    editTotalButton.style.display = 'inline-block';
+                };
+                
+                // Save on Enter, cancel on Escape
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSave();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        handleCancel();
+                    }
+                });
+                
+                // Save on blur
+                input.addEventListener('blur', handleSave, { once: true });
+            });
         }
     });
 </script>

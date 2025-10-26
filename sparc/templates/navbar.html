@@ -239,6 +239,161 @@
     .profile-hover-card:hover .profile-image-overlay {
       opacity: 1;
     }
+
+    /* ENHANCED Mobile Responsiveness */
+    @media (max-width: 768px) {
+      /* Mobile-first approach: sidebar hidden by default */
+      #sidebar {
+        transform: translateX(-100%) !important;
+        width: 280px !important; /* Slightly wider on mobile for better touch targets */
+        z-index: 50 !important;
+      }
+      
+      /* When sidebar is shown on mobile */
+      #sidebar.show {
+        transform: translateX(0) !important;
+      }
+      
+      /* CRITICAL: Force main content to use full width on mobile */
+      body {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+      }
+      
+      /* Remove any main content margins that assume sidebar space */
+      .main-content, #main-content, .content-wrapper, .wrapper {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      
+      /* Mobile menu button positioning and styling */
+      #mobile-toggle {
+        position: fixed !important;
+        top: 1rem !important;
+        left: 1rem !important;
+        z-index: 60 !important;
+        padding: 0.75rem !important;
+        border-radius: 0.75rem !important;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
+      }
+      
+      /* Enhanced mobile menu button hover */
+      #mobile-toggle:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+      }
+      
+      /* Mobile overlay for sidebar */
+      #overlay {
+        position: fixed !important;
+        inset: 0 !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        z-index: 45 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      #overlay.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      
+      /* Mobile navigation items - larger touch targets */
+      .nav-item {
+        padding: 1rem !important;
+        margin-bottom: 0.5rem !important;
+        border-radius: 0.75rem !important;
+      }
+      
+      /* Mobile navigation labels - always visible */
+      .nav-label {
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+      }
+      
+      /* Mobile profile section */
+      .profile-section {
+        padding: 1.5rem !important;
+      }
+      
+      .profile-hover-card {
+        padding: 1rem !important;
+        border-radius: 0.75rem !important;
+      }
+      
+      /* Mobile sidebar header */
+      .sidebar-logo {
+        height: 4rem !important;
+        width: auto !important;
+      }
+      
+      /* Hide desktop sidebar toggle on mobile */
+      #sidebar-toggle {
+        display: none !important;
+      }
+      
+      /* Mobile sidebar animations */
+      #sidebar {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      }
+      
+      /* Mobile touch improvements */
+      .nav-item:active {
+        transform: scale(0.98) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+      }
+      
+      /* Mobile scrolling improvements */
+      nav {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      
+      nav::-webkit-scrollbar {
+        display: none !important;
+      }
+    }
+    
+    /* Extra small mobile devices */
+    @media (max-width: 480px) {
+      #sidebar {
+        width: 100vw !important;
+        max-width: 320px !important;
+      }
+      
+      #mobile-toggle {
+        padding: 0.625rem !important;
+      }
+      
+      .nav-item {
+        padding: 0.875rem !important;
+      }
+      
+      .sidebar-logo {
+        height: 3.5rem !important;
+      }
+    }
+    
+    /* Landscape mobile orientation */
+    @media (max-width: 768px) and (orientation: landscape) {
+      #sidebar {
+        width: 240px !important;
+      }
+      
+      .nav-item {
+        padding: 0.75rem !important;
+        margin-bottom: 0.25rem !important;
+      }
+      
+      .profile-section {
+        padding: 1rem !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -257,6 +412,9 @@
       <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
   </button>
+
+  <!-- Mobile Overlay -->
+  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
 
   <!-- Sidebar -->
   <div id="sidebar" class="fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-in-out sidebar-gradient text-white shadow-xl w-64 -translate-x-full md:translate-x-0">
@@ -334,7 +492,7 @@
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
           <line x1="2" y1="10" x2="22" y2="10"/>
         </svg>
-        <span class="nav-label transition-all duration-200 font-medium">Tranches</span>
+        <span class="nav-label transition-all duration-200 font-medium">Account Summary</span>
         {% if new_tranches_count %}<span class="badge">{{ new_tranches_count }}</span>{% endif %}
       </a>
 
@@ -366,7 +524,19 @@
       </a>
     {% endif %}
     <style>
-  .badge{margin-left:4px;@apply bg-red-600 text-white text-[10px] font-semibold px-1.5 rounded-full;}
+  .badge {
+    margin-left: 4px;
+    background-color: #dc2626;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 0.375rem 0.375rem;
+    border-radius: 9999px;
+    display: inline-block;
+    min-width: 1rem;
+    text-align: center;
+    line-height: 1;
+  }
 </style>
     </nav>
 
@@ -467,31 +637,64 @@
         toggleSidebar(expanded);
     });
     
-    mobileToggle.addEventListener('click', () => {
-      isMobileOpen = !isMobileOpen;
+    // Enhanced mobile toggle functionality
+    function toggleMobileSidebar(show) {
+      isMobileOpen = show;
       
-      if (isMobileOpen) {
+      if (show) {
         sidebar.classList.remove('-translate-x-full');
-        sidebar.classList.add('translate-x-0');
+        sidebar.classList.add('translate-x-0', 'show');
         overlay.classList.remove('hidden');
+        overlay.classList.add('show');
         menuIcon.classList.add('hidden');
         closeIcon.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
       } else {
-        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.remove('translate-x-0', 'show');
         sidebar.classList.add('-translate-x-full');
         overlay.classList.add('hidden');
+        overlay.classList.remove('show');
         menuIcon.classList.remove('hidden');
         closeIcon.classList.add('hidden');
+        document.body.style.overflow = ''; // Restore scrolling
       }
+    }
+
+    mobileToggle.addEventListener('click', () => {
+      toggleMobileSidebar(!isMobileOpen);
     });
     
     overlay.addEventListener('click', () => {
-      isMobileOpen = false;
-      sidebar.classList.remove('translate-x-0');
-      sidebar.classList.add('-translate-x-full');
-      overlay.classList.add('hidden');
-      menuIcon.classList.remove('hidden');
-      closeIcon.classList.add('hidden');
+      toggleMobileSidebar(false);
+    });
+    
+    // Close mobile sidebar when clicking on nav items (better UX)
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 768 && isMobileOpen) {
+          toggleMobileSidebar(false);
+        }
+      });
+    });
+    
+    // Handle window resize - close mobile sidebar on desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768 && isMobileOpen) {
+        toggleMobileSidebar(false);
+      }
+    });
+    
+    // Handle escape key to close mobile sidebar
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isMobileOpen) {
+        toggleMobileSidebar(false);
+      }
+    });
+    
+    // Prevent sidebar from closing when clicking inside it
+    sidebar.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
   </script>
 </body>

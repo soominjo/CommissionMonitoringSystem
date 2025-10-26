@@ -67,6 +67,45 @@ __all__ = [
 ]
 
 
+def _get_default_signature_url(role):
+    """Get the URL for default signature based on role."""
+    import os
+    from django.conf import settings
+    from django.templatetags.static import static
+    
+    # Map roles to default signature filenames
+    default_signatures = {
+        'prepared_by': 'shiela-esign.jpeg',
+        'checked_by': 'cha-esign.jpeg', 
+        'approved_by': 'gab-esign.jpeg'
+    }
+    
+    if role not in default_signatures:
+        return None
+    
+    # Check if file exists in static/media directory
+    filename = default_signatures[role]
+    static_path = os.path.join(settings.BASE_DIR, 'sparc', 'static', 'media', filename)
+    
+    if os.path.exists(static_path):
+        return static(f'media/{filename}')
+    
+    return None
+
+
+def _get_signature_url_or_default(invoice, role):
+    """Get signature URL from invoice field or return default signature URL."""
+    # Get the signature field for this role
+    signature_field = getattr(invoice, f"{role}_signature", None)
+    
+    # If signature exists and has a file, return its URL
+    if signature_field and signature_field.name:
+        return signature_field.url
+    
+    # Otherwise return default signature URL
+    return _get_default_signature_url(role)
+
+
 def _generate_invoice_image(html_content, invoice_no):
     """Generate a high-quality PNG image from HTML invoice content.
     
@@ -992,19 +1031,24 @@ def _consolidate_billing_history(all_received_tranches):
     latest_date = None
     
     for tranche in all_received_tranches:
-        # Sum the received amount
-        total_amount += tranche.received_amount or Decimal('0.00')
+        # Sum the amounts
+        if tranche.received_amount:
+            total_amount += tranche.received_amount
         
         # Track the latest date
         if tranche.date_received:
             if latest_date is None or tranche.date_received > latest_date:
                 latest_date = tranche.date_received
         
-        # Calculate percentage for this tranche
+        # Calculate percentage for this tranche using actual record percentages
         if tranche.tranche_record:
-            same_type_tranches = tranche.tranche_record.payments.filter(is_lto=tranche.is_lto)
+            record = tranche.tranche_record
+            same_type_tranches = record.payments.filter(is_lto=tranche.is_lto)
             same_type_total = same_type_tranches.aggregate(total=Sum('expected_amount'))['total'] or Decimal('1.0')
-            percentage_within_type = (tranche.expected_amount / same_type_total) * Decimal('50.0')
+            
+            # Use actual option1_percentage or option2_percentage from the record
+            period_percentage = record.option2_percentage if tranche.is_lto else record.option1_percentage
+            percentage_within_type = (tranche.expected_amount / same_type_total) * period_percentage
             total_percentage += percentage_within_type
     
     # Return single consolidated entry
@@ -1271,8 +1315,9 @@ def _get_invoice_context(invoice, request):
         is_all_dp = all(not t.is_lto for t in combined_tranches)
         
         if is_all_lto or is_all_dp:
-            # All tranches are of the same type, so this represents 50% of the total commission
-            combined_percentage = Decimal('50.0')
+            # All tranches are of the same type, use actual percentage from record
+            record = combined_tranches[0].tranche_record
+            combined_percentage = record.option2_percentage if is_all_lto else record.option1_percentage
         else:
             # Mixed types, calculate based on total expected commission
             combined_percentage = (combined_expected_amount / total_expected_commission) * Decimal('100')
@@ -1304,8 +1349,9 @@ def _get_invoice_context(invoice, request):
             same_type_tranches = record.payments.filter(is_lto=tranche_payment.is_lto)
             same_type_total = same_type_tranches.aggregate(total=Sum('expected_amount'))['total'] or Decimal('1.0')
             
-            # Calculate percentage within the period type (should total 50% for each period)
-            percentage_within_type = (tranche_payment.expected_amount / same_type_total) * Decimal('50.0')
+            # Calculate percentage within the period type using actual record percentages
+            period_percentage = record.option2_percentage if tranche_payment.is_lto else record.option1_percentage
+            percentage_within_type = (tranche_payment.expected_amount / same_type_total) * period_percentage
             
             item_data = {
                 'date_received': tranche_payment.date_received,
@@ -1340,10 +1386,11 @@ def _get_invoice_context(invoice, request):
             # Find the invoice associated with that payment
             prev_invoice = payment.invoices.first()
             if prev_invoice:
-                # Calculate percentage based on period type (DP or LTO should each be 50%)
+                # Calculate percentage based on period type using actual record percentages
                 same_type_tranches = record.payments.filter(is_lto=payment.is_lto)
                 same_type_total = same_type_tranches.aggregate(total=Sum('expected_amount'))['total'] or Decimal('1.0')
-                percentage = (payment.expected_amount / same_type_total) * Decimal('50.0') if same_type_total else 0
+                period_percentage = record.option2_percentage if payment.is_lto else record.option1_percentage
+                percentage = (payment.expected_amount / same_type_total) * period_percentage if same_type_total else 0
                 
                 previous_invoices.append({
                     'tranche_name': f"Tranche-{record.id}",  # Use the record ID for a consistent name
@@ -1400,11 +1447,27 @@ def _get_invoice_context(invoice, request):
     can_approve = request.user.is_superuser
     can_prepare = request.user == invoice.prepared_by
     
+    # Add signature URLs (uploaded or default)
+    signature_urls = {
+        'prepared_by_signature_url': _get_signature_url_or_default(invoice, 'prepared_by'),
+        'checked_by_signature_url': _get_signature_url_or_default(invoice, 'checked_by'),
+        'approved_by_signature_url': _get_signature_url_or_default(invoice, 'approved_by'),
+    }
+    
+    # Add signature dates for consistent display
+    signature_dates = {
+        'prepared_by_display_date': invoice.prepared_by_date or invoice.created_at,
+        'checked_by_display_date': invoice.checked_by_date or invoice.created_at,
+        'approved_by_display_date': invoice.approved_by_date or invoice.created_at,
+    }
+    
     context.update({
         'can_edit_bill_to': can_edit_bill_to,
         'can_check': can_check,
         'can_approve': can_approve,
         'can_prepare': can_prepare,
+        **signature_urls,
+        **signature_dates,
     })
     
     # Extract stored item data from notes field

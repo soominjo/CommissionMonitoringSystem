@@ -401,47 +401,53 @@
     <!-- Signatures -->
     <section class="grid grid-cols-3 gap-6 text-center text-xs pt-6 border-t-2 border-gray-200">
       <div class="signature-container" data-role="prepared_by">
-        <img id="signature-prepared_by" src="{% if invoice.prepared_by_signature %}{{ invoice.prepared_by_signature.url }}{% else %}{% static 'media/placeholder.png' %}{% endif %}" alt="Signature" class="h-16 w-auto mx-auto mb-2 border-b pb-2">
+        <img id="signature-prepared_by" src="{{ prepared_by_signature_url }}" alt="Signature" class="h-16 w-auto mx-auto mb-2 border-b pb-2">
         <p class="font-bold">Prepared By</p>
         <p class="text-gray-600">{{ invoice.prepared_by.get_full_name }}</p>
-        <p class="text-gray-500">{{ invoice.created_at|date:"m/d/Y" }}</p>
+        <p class="text-gray-500">{{ prepared_by_display_date|date:"m/d/Y" }}</p>
         {% if can_prepare %}
         <div class="mt-2 space-x-1 no-print">
-          <button onclick="document.getElementById('signature-upload-prepared_by').click()" class="btn-sig">Attach Signature</button>
+          <button onclick="document.getElementById('signature-upload-prepared_by').click()" class="btn-sig" id="btn-prepared_by">
+            {% if invoice.prepared_by_signature %}Edit Signature{% else %}Attach Signature{% endif %}
+          </button>
           <button class="btn-sig-clear clear-signature-btn">Clear</button>
           <input type="file" id="signature-upload-prepared_by" class="hidden" accept="image/*">
         </div>
         {% endif %}
       </div>
       <div class="signature-container" data-role="checked_by">
-        <img id="signature-checked_by" src="{% if invoice.checked_by_signature %}{{ invoice.checked_by_signature.url }}{% else %}{% static 'media/placeholder.png' %}{% endif %}" alt="Signature" class="h-16 w-auto mx-auto mb-2 border-b pb-2">
+        <img id="signature-checked_by" src="{{ checked_by_signature_url }}" alt="Signature" class="h-16 w-auto mx-auto mb-2 border-b pb-2">
         <p class="font-bold">Checked By</p>
-        {% if invoice.checked_by_signature %}
+        {% if invoice.checked_by_signature or checked_by_signature_url %}
         <p class="text-gray-600">Inner SPARC Realty Corporation</p>
-        <p class="text-gray-500">{{ invoice.checked_by_date|date:"m/d/Y" }}</p>
+        <p class="text-gray-500">{{ checked_by_display_date|date:"m/d/Y" }}</p>
         {% else %}
         <p class="text-gray-400 italic">(Not yet checked)</p>
         {% endif %}
         {% if can_check %}
         <div class="mt-2 space-x-1 no-print">
-          <button onclick="document.getElementById('signature-upload-checked_by').click()" class="btn-sig">Attach Signature</button>
+          <button onclick="document.getElementById('signature-upload-checked_by').click()" class="btn-sig" id="btn-checked_by">
+            {% if invoice.checked_by_signature %}Edit Signature{% else %}Attach Signature{% endif %}
+          </button>
           <button class="btn-sig-clear clear-signature-btn">Clear</button>
           <input type="file" id="signature-upload-checked_by" class="hidden" accept="image/*">
         </div>
         {% endif %}
       </div>
       <div class="signature-container" data-role="approved_by">
-        <img id="signature-approved_by" src="{% if invoice.approved_by_signature %}{{ invoice.approved_by_signature.url }}{% else %}{% static 'media/placeholder.png' %}{% endif %}" alt="Signature" class="h-16 w-auto mx-auto mb-2 border-b pb-2">
+        <img id="signature-approved_by" src="{{ approved_by_signature_url }}" alt="Signature" class="h-16 w-auto mx-auto mb-2 border-b pb-2">
         <p class="font-bold">Approved By</p>
-        {% if invoice.approved_by_signature %}
+        {% if invoice.approved_by_signature or approved_by_signature_url %}
         <p class="text-gray-600">Inner SPARC Realty Corporation</p>
-        <p class="text-gray-500">{{ invoice.approved_by_date|date:"m/d/Y" }}</p>
+        <p class="text-gray-500">{{ approved_by_display_date|date:"m/d/Y" }}</p>
         {% else %}
         <p class="text-gray-400 italic">(Not yet approved)</p>
         {% endif %}
         {% if can_approve %}
         <div class="mt-2 space-x-1 no-print">
-          <button onclick="document.getElementById('signature-upload-approved_by').click()" class="btn-sig">Attach Signature</button>
+          <button onclick="document.getElementById('signature-upload-approved_by').click()" class="btn-sig" id="btn-approved_by">
+            {% if invoice.approved_by_signature %}Edit Signature{% else %}Attach Signature{% endif %}
+          </button>
           <button class="btn-sig-clear clear-signature-btn">Clear</button>
           <input type="file" id="signature-upload-approved_by" class="hidden" accept="image/*">
         </div>
@@ -1232,12 +1238,24 @@ document.addEventListener('DOMContentLoaded', function() {
                   if (targetImg && data.signature_url) {
                       targetImg.src = data.signature_url + '?v=' + Date.now();
                   }
+                  
+                  // Update button text to "Edit Signature"
+                  const button = document.getElementById(`btn-${role}`);
+                  if (button) {
+                      button.textContent = 'Edit Signature';
+                  }
               } else {
                   showAlert(data.error, 'error');
-                  // Revert to placeholder on error
+                  // Revert to default signature on error
                   const targetImg = document.getElementById(`signature-${role}`);
                   if (targetImg) {
-                      targetImg.src = "{% static 'media/placeholder.png' %}";
+                      // Get default signature URL from context
+                      const defaultUrls = {
+                          'prepared_by': '{{ prepared_by_signature_url }}',
+                          'checked_by': '{{ checked_by_signature_url }}',
+                          'approved_by': '{{ approved_by_signature_url }}'
+                      };
+                      targetImg.src = defaultUrls[role] || "{% static 'media/placeholder.png' %}";
                   }
               }
               
@@ -1247,10 +1265,15 @@ document.addEventListener('DOMContentLoaded', function() {
           .catch(error => {
               console.error('Error:', error);
               showAlert('Error uploading signature', 'error');
-              // Revert to placeholder on error
+              // Revert to default signature on error
               const targetImg = document.getElementById(`signature-${role}`);
               if (targetImg) {
-                  targetImg.src = "{% static 'media/placeholder.png' %}";
+                  const defaultUrls = {
+                      'prepared_by': '{{ prepared_by_signature_url }}',
+                      'checked_by': '{{ checked_by_signature_url }}',
+                      'approved_by': '{{ approved_by_signature_url }}'
+                  };
+                  targetImg.src = defaultUrls[role] || "{% static 'media/placeholder.png' %}";
               }
               e.target.value = '';
           });
@@ -1277,10 +1300,21 @@ document.addEventListener('DOMContentLoaded', function() {
           .then(data => {
               if (data.success) {
                   showAlert(data.message, 'success');
-                  // Reset only the specific role's signature image to placeholder
+                  // Reset to default signature instead of placeholder
                   const signatureImg = document.getElementById(`signature-${role}`);
                   if (signatureImg) {
-                      signatureImg.src = "{% static 'media/placeholder.png' %}";
+                      const defaultUrls = {
+                          'prepared_by': '{{ prepared_by_signature_url }}',
+                          'checked_by': '{{ checked_by_signature_url }}',
+                          'approved_by': '{{ approved_by_signature_url }}'
+                      };
+                      signatureImg.src = defaultUrls[role] || "{% static 'media/placeholder.png' %}";
+                  }
+                  
+                  // Update button text back to "Attach Signature"
+                  const button = document.getElementById(`btn-${role}`);
+                  if (button) {
+                      button.textContent = 'Attach Signature';
                   }
               } else {
                   showAlert(data.error, 'error');

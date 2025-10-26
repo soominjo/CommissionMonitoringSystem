@@ -36,6 +36,17 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
   }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <!-- Header -->
@@ -74,7 +85,7 @@
       
       <!-- Project Information Section -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl shadow-lg form-section border border-blue-200">
+        <div class=" p-8 rounded-2xl shadow-lg form-section border border-blue-200">
           <div class="flex items-center mb-6">
             <div class="p-3 bg-blue-500 rounded-xl mr-4">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +113,7 @@
           </div>
         </div>
 
-        <div class="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl shadow-lg form-section border border-green-200">
+        <div class=" p-8 rounded-2xl shadow-lg form-section border border-green-200">
           <div class="flex items-center mb-6">
             <div class="p-3 bg-green-500 rounded-xl mr-4">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,31 +143,66 @@
         </div>
       </div>
 
+
       <!-- Enhanced Down Payment Schedule -->
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-12 form-section border border-gray-200">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
-          <h3 class="text-2xl font-bold text-white flex items-center">
-            <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
-            Down Payment Schedule ({{ record.option1_percentage }}%)
-          </h3>
+        <div class=" p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-bold text-blue-600 flex items-center">
+              <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              Down Payment Schedule ({{ record.option1_percentage }}%)
+            </h3>
+            {% if user.is_superuser or user.is_staff %}
+            <div class="flex items-center space-x-4">
+              <label class="flex items-center text-blue-500 cursor-pointer">
+                <input type="checkbox" id="select-all-dp" class="mr-2 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <span class="text-sm font-medium">Select All</span>
+              </label>
+              <button type="button" id="generate-combined-voucher-btn" 
+                      class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed" 
+                      disabled>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Generate Voucher
+              </button>
+            </div>
+            {% endif %}
+          </div>
         </div>
         <div class="overflow-x-auto">
           <table class="min-w-full">
             <thead class="bg-gray-50">
               <tr>
+                {% if user.is_superuser or user.is_staff %}
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Select</th>
+                {% endif %}
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Tranche #</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Expected Date</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Expected Commission</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actual Commission</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Date Received</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Voucher</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
               </tr>
-            </thead>
+            </thead> 
             <tbody class="divide-y divide-gray-200">
               {% for item in dp_tranches %}
               <tr class="hover:bg-blue-50 transition-colors duration-300">
+                {% if user.is_superuser or user.is_staff %}
+                <td class="px-6 py-4">
+                  <input type="checkbox" 
+                         class="dp-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" 
+                         data-tranche-id="{{ item.tranche.id }}" 
+                         data-expected-commission="{{ item.expected_commission }}" 
+                         data-actual-commission="{{ item.tranche.received_amount|default:0 }}"
+                         data-tranche-number="{{ item.tranche.tranche_number }}"
+                         {% if item.tranche.combined_voucher_number %}disabled title="Already part of combined voucher {{ item.tranche.combined_voucher_number }}"{% endif %}>
+                </td>
+                {% endif %}
                 <td class="px-6 py-4 font-bold text-blue-600">{{ item.tranche.tranche_number }}</td>
                 <td class="px-6 py-4 text-gray-700">{{ item.tranche.expected_date|date:"M d, Y" }}</td>
                 <td class="px-6 py-4 font-semibold text-green-600">₱{{ item.expected_commission|floatformat:2|intcomma }}</td>
@@ -167,7 +213,8 @@
                            name="received_amount_{{ item.tranche.id }}" 
                            value="{{ item.tranche.received_amount|default:0 }}"
                            step="0.01"
-                           class="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 input-focus transition-all bg-white shadow-sm"
+                           class="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 input-focus transition-all bg-white shadow-sm tranche-received-amount"
+                           data-tranche-id="{{ item.tranche.id }}"
                            onchange="updateStatus(this, '{{ item.expected_commission }}', 'status_{{ item.tranche.id }}')">
                   </div>
                 </td>
@@ -175,7 +222,8 @@
                   <input type="date" 
                          name="date_received_{{ item.tranche.id }}" 
                          value="{% if item.tranche.date_received %}{{ item.tranche.date_received|date:'Y-m-d' }}{% endif %}"
-                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 input-focus transition-all bg-white shadow-sm">
+                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 input-focus transition-all bg-white shadow-sm tranche-date-received"
+                         data-tranche-id="{{ item.tranche.id }}">
                 </td>
                 <td class="px-6 py-4">
                   <span id="status_{{ item.tranche.id }}" 
@@ -186,6 +234,37 @@
                     {{ item.tranche.status }}
                   </span>
                 </td>
+                <td class="px-6 py-4">
+                  {% if item.tranche.combined_voucher_number %}
+                    <a href="{% url 'view_receivable_voucher' item.tranche.combined_voucher_number %}" 
+                       class="inline-flex items-center px-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium">
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                      Combined
+                    </a>
+                  {% else %}
+                    <span class="text-gray-400 text-xs">-</span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4">
+                  <form method="POST" action="{% url 'update_individual_tranche' %}" class="inline-block">
+                    {% csrf_token %}
+                    <input type="hidden" name="tranche_payment_id" value="{{ item.tranche.id }}">
+                    <input type="hidden" name="tranche_record_id" value="{{ record.id }}">
+                    <input type="hidden" name="expected_amount" value="{{ item.expected_commission }}">
+                    <input type="hidden" name="received_amount" class="received-amount-hidden" value="{{ item.tranche.received_amount|default:0 }}" data-tranche-id="{{ item.tranche.id }}">
+                    <input type="hidden" name="date_received" class="date-received-hidden" value="{% if item.tranche.date_received %}{{ item.tranche.date_received|date:'Y-m-d' }}{% endif %}" data-tranche-id="{{ item.tranche.id }}">
+                    <button type="submit" 
+                            class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md save-tranche-btn"
+                            onclick="this.disabled=true; this.innerHTML='<svg class=\'w-4 h-4 mr-1 animate-spin\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><circle class=\'opacity-25\' cx=\'12\' cy=\'12\' r=\'10\' stroke=\'currentColor\' stroke-width=\'4\'></circle><path class=\'opacity-75\' fill=\'currentColor\' d=\'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\'></path></svg> Saving...'; this.form.submit();">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                      </svg>
+                      Save
+                    </button>
+                  </form>
+                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -193,10 +272,44 @@
         </div>
       </div>
 
+      <!-- Selection Summary Section -->
+      {% if user.is_superuser or user.is_staff %}
+      <div id="selection-summary" class="bg-gradient-to-r from-blue-50 to-pink-50 border border-blue-200 rounded-2xl p-6 mb-8 hidden">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <div>
+              <h3 class="text-xl font-bold text-gray-800">Combined Voucher Selection</h3>
+              <p class="text-gray-600">
+                <span id="selected-count">0</span> tranches selected • 
+                Total Expected Commission: <span id="summary-expected" class="font-semibold text-green-600">₱ 0.00</span>
+              </p>
+            </div>
+          </div>
+          <form id="generate-combined-voucher-form" method="POST" action="{% url 'create_combined_voucher' %}">
+            {% csrf_token %}
+            <input type="hidden" name="tranche_record_id" value="{{ record.id }}">
+            <input type="hidden" id="selected-tranche-ids" name="tranche_ids" value="">
+            <button type="submit" id="submit-combined-voucher-btn" 
+                    class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Generate Voucher
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      <br> <br>
+
       <!-- Enhanced Loan Take Out Schedule -->
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-12 form-section border border-gray-200">
-        <div class="bg-gradient-to-r from-orange-600 to-red-600 p-6">
-          <h3 class="text-2xl font-bold text-white flex items-center">
+        <div class=" p-6">
+          <h3 class="text-2xl font-bold text-orange-500 flex items-center">
             <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
             </svg>
@@ -212,6 +325,7 @@
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actual Commission</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Date Received</th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -226,7 +340,8 @@
                            name="received_amount_{{ item.tranche.id }}" 
                            value="{{ item.tranche.received_amount|default:0 }}"
                            step="0.01"
-                           class="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 input-focus transition-all bg-white shadow-sm"
+                           class="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 input-focus transition-all bg-white shadow-sm tranche-received-amount"
+                           data-tranche-id="{{ item.tranche.id }}"
                            onchange="updateStatus(this, '{{ item.expected_commission }}', 'status_{{ item.tranche.id }}')">
                   </div>
                 </td>
@@ -234,7 +349,8 @@
                   <input type="date" 
                          name="date_received_{{ item.tranche.id }}" 
                          value="{% if item.tranche.date_received %}{{ item.tranche.date_received|date:'Y-m-d' }}{% endif %}"
-                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 input-focus transition-all bg-white shadow-sm">
+                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-orange-500 focus:border-orange-500 input-focus transition-all bg-white shadow-sm tranche-date-received"
+                         data-tranche-id="{{ item.tranche.id }}">
                 </td>
                 <td class="px-6 py-4">
                   <span id="status_{{ item.tranche.id }}" 
@@ -244,6 +360,24 @@
                         {% else %}bg-red-100 text-red-800{% endif %}">
                     {{ item.tranche.status }}
                   </span>
+                </td>
+                <td class="px-6 py-4">
+                  <form method="POST" action="{% url 'update_individual_tranche' %}" class="inline-block">
+                    {% csrf_token %}
+                    <input type="hidden" name="tranche_payment_id" value="{{ item.tranche.id }}">
+                    <input type="hidden" name="tranche_record_id" value="{{ record.id }}">
+                    <input type="hidden" name="expected_amount" value="{{ item.expected_commission }}">
+                    <input type="hidden" name="received_amount" class="received-amount-hidden" value="{{ item.tranche.received_amount|default:0 }}" data-tranche-id="{{ item.tranche.id }}">
+                    <input type="hidden" name="date_received" class="date-received-hidden" value="{% if item.tranche.date_received %}{{ item.tranche.date_received|date:'Y-m-d' }}{% endif %}" data-tranche-id="{{ item.tranche.id }}">
+                    <button type="submit" 
+                            class="inline-flex items-center px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-all duration-200 shadow-sm hover:shadow-md save-tranche-btn"
+                            onclick="this.disabled=true; this.innerHTML='<svg class=\'w-4 h-4 mr-1 animate-spin\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><circle class=\'opacity-25\' cx=\'12\' cy=\'12\' r=\'10\' stroke=\'currentColor\' stroke-width=\'4\'></circle><path class=\'opacity-75\' fill=\'currentColor\' d=\'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\'></path></svg> Saving...'; this.form.submit();">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                      </svg>
+                      Save
+                    </button>
+                  </form>
                 </td>
               </tr>
               {% endfor %}
@@ -255,7 +389,9 @@
       <!-- Enhanced Submit Button -->
       <div class="flex justify-center mt-12">
         <button type="submit" 
-                class="inline-flex items-center px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-lg font-bold rounded-2xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-500 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+                id="main-save-button"
+                class="inline-flex items-center px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-lg font-bold rounded-2xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-500 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
+                onclick="this.disabled=true; this.innerHTML='<svg class=\'w-6 h-6 mr-3 animate-spin\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><circle class=\'opacity-25\' cx=\'12\' cy=\'12\' r=\'10\' stroke=\'currentColor\' stroke-width=\'4\'></circle><path class=\'opacity-75\' fill=\'currentColor\' d=\'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\'></path></svg> Saving All Changes...'; this.form.submit();">
           <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
           </svg>
@@ -288,8 +424,300 @@ function updateStatus(input, expectedAmount, statusId) {
     statusElement.className = classes;
 }
 
+// Multi-select functionality for combined voucher generation
+function formatCurrency(amount) {
+    return '₱ ' + parseFloat(amount).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+// Helper function to check if a tranche should be auto-populated
+function shouldAutoPopulateTranche(trancheId) {
+    // Check the status badge text
+    const statusElement = document.getElementById(`status_${trancheId}`);
+    const statusText = statusElement ? statusElement.textContent.trim() : '';
+    
+    // Check the current actual commission value
+    const actualCommissionInput = document.querySelector(`input[name="received_amount_${trancheId}"]`);
+    const currentValue = actualCommissionInput ? parseFloat(actualCommissionInput.value) || 0 : 0;
+    
+    // Only auto-populate if:
+    // 1. Status is "Pending" (not "Received" or "Partial")
+    // 2. Current actual commission is 0 or very close to 0 (accounting for floating point precision)
+    return statusText === 'Pending' && currentValue <= 0.01;
+}
+
+// Auto-populate tranche data when checkbox is selected
+function autoPopulateTrancheData(checkbox, forcePopulate = false) {
+    const trancheId = checkbox.dataset.trancheId;
+    const expectedCommission = checkbox.dataset.expectedCommission;
+    
+    if (!trancheId) return;
+    
+    // Find the corresponding input fields for this tranche
+    const actualCommissionInput = document.querySelector(`input[name="received_amount_${trancheId}"]`);
+    const dateReceivedInput = document.querySelector(`input[name="date_received_${trancheId}"]`);
+    const hiddenReceivedAmountInput = document.querySelector(`.received-amount-hidden[data-tranche-id="${trancheId}"]`);
+    const hiddenDateReceivedInput = document.querySelector(`.date-received-hidden[data-tranche-id="${trancheId}"]`);
+    
+    if (checkbox.checked) {
+        // Check if we should auto-populate (unless forced by individual checkbox click)
+        if (!forcePopulate && !shouldAutoPopulateTranche(trancheId)) {
+            // Don't auto-populate, but keep the checkbox checked for voucher generation
+            return;
+        }
+        
+        // Auto-populate when checkbox is selected
+        if (actualCommissionInput && expectedCommission) {
+            // Remove currency formatting and set the numeric value
+            const numericValue = parseFloat(expectedCommission) || 0;
+            actualCommissionInput.value = numericValue.toFixed(2);
+            
+            // Update hidden field for form submission
+            if (hiddenReceivedAmountInput) {
+                hiddenReceivedAmountInput.value = numericValue.toFixed(2);
+            }
+            
+            // Trigger the existing updateStatus function to update the status badge
+            updateStatus(actualCommissionInput, expectedCommission, `status_${trancheId}`);
+        }
+        
+        if (dateReceivedInput) {
+            // Set today's date in YYYY-MM-DD format
+            const today = new Date().toISOString().split('T')[0];
+            dateReceivedInput.value = today;
+            
+            // Update hidden field for form submission
+            if (hiddenDateReceivedInput) {
+                hiddenDateReceivedInput.value = today;
+            }
+        }
+    } else {
+        // Clear fields when checkbox is unchecked (only if it was previously auto-populated)
+        if (forcePopulate || shouldAutoPopulateTranche(trancheId)) {
+            if (actualCommissionInput) {
+                actualCommissionInput.value = '0.00';
+                if (hiddenReceivedAmountInput) {
+                    hiddenReceivedAmountInput.value = '0.00';
+                }
+                // Update status to reflect the cleared value
+                updateStatus(actualCommissionInput, expectedCommission, `status_${trancheId}`);
+            }
+            
+            if (dateReceivedInput) {
+                dateReceivedInput.value = '';
+                if (hiddenDateReceivedInput) {
+                    hiddenDateReceivedInput.value = '';
+                }
+            }
+        }
+    }
+}
+
+function updateSelectionSummary() {
+    const selectionSummary = document.getElementById('selection-summary');
+    const selectedCountElement = document.getElementById('selected-count');
+    const summaryExpectedElement = document.getElementById('summary-expected');
+    const generateCombinedVoucherBtn = document.getElementById('generate-combined-voucher-btn');
+    const submitCombinedVoucherBtn = document.getElementById('submit-combined-voucher-btn');
+    
+    const dpCheckboxes = document.querySelectorAll('.dp-checkbox');
+    let count = 0;
+    let totalActual = 0;
+    let selectedTrancheIds = [];
+
+    dpCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            count++;
+            // Use expected commission (Net Commission - Less Tax) for voucher calculation
+            const expectedCommission = parseFloat(checkbox.dataset.expectedCommission) || 0;
+            totalActual += expectedCommission;
+            selectedTrancheIds.push(checkbox.dataset.trancheId);
+        }
+    });
+
+    selectedCountElement.textContent = count;
+    summaryExpectedElement.textContent = formatCurrency(totalActual);
+
+    // Update hidden form field with selected tranche IDs
+    const selectedTrancheIdsInput = document.getElementById('selected-tranche-ids');
+    if (selectedTrancheIdsInput) {
+        selectedTrancheIdsInput.value = selectedTrancheIds.join(',');
+    }
+
+    // Enable/disable generate voucher buttons based on selection
+    // Allow single selection for voucher generation
+    if (generateCombinedVoucherBtn) {
+        generateCombinedVoucherBtn.disabled = count < 1;
+    }
+    if (submitCombinedVoucherBtn) {
+        submitCombinedVoucherBtn.disabled = count < 1;
+    }
+
+    // Show/hide summary section based on selection count
+    if (count >= 1) {
+        selectionSummary.classList.remove('hidden');
+        selectionSummary.style.animation = 'slideIn 0.3s ease-out';
+        
+        // Update the message based on selection count
+        const summaryText = selectionSummary.querySelector('p');
+        if (count === 1) {
+            summaryText.innerHTML = `<span id="selected-count">${count}</span> tranche selected • 
+                Total Expected Commission: <span id="summary-expected" class="font-semibold text-green-600">${formatCurrency(totalActual)}</span>
+                <br><span class="text-sm text-green-600">Ready to generate voucher</span>`;
+        } else {
+            summaryText.innerHTML = `<span id="selected-count">${count}</span> tranches selected • 
+                Total Expected Commission: <span id="summary-expected" class="font-semibold text-green-600">${formatCurrency(totalActual)}</span>
+                <br><span class="text-sm text-green-600">Ready to generate combined voucher</span>`;
+        }
+    } else {
+        selectionSummary.classList.add('hidden');
+    }
+}
+
 // Enhanced form interactions
 document.addEventListener('DOMContentLoaded', function() {
+    // Multi-select functionality
+    const selectAllDp = document.getElementById('select-all-dp');
+    const dpCheckboxes = document.querySelectorAll('.dp-checkbox');
+    const generateCombinedVoucherBtn = document.getElementById('generate-combined-voucher-btn');
+    const generateCombinedVoucherForm = document.getElementById('generate-combined-voucher-form');
+
+    // Select All functionality for Down Payment
+    if (selectAllDp) {
+        selectAllDp.addEventListener('change', function() {
+            const selectAllChecked = this.checked;
+            
+            dpCheckboxes.forEach(checkbox => {
+                const trancheId = checkbox.dataset.trancheId;
+                
+                if (selectAllChecked) {
+                    // When selecting all, only check and auto-populate pending tranches
+                    if (shouldAutoPopulateTranche(trancheId)) {
+                        checkbox.checked = true;
+                        autoPopulateTrancheData(checkbox, false); // Don't force, use conditional logic
+                    }
+                    // Leave already received/partial tranches unchecked
+                } else {
+                    // When unselecting all, uncheck all checkboxes
+                    checkbox.checked = false;
+                    autoPopulateTrancheData(checkbox, false); // Don't force, use conditional logic
+                }
+            });
+            updateSelectionSummary();
+        });
+    }
+
+    // Individual checkbox change events
+    dpCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectionSummary();
+            
+            // Auto-populate functionality - force populate for individual clicks
+            autoPopulateTrancheData(this, true);
+            
+            // Update select all checkbox state
+            const checkedCount = Array.from(dpCheckboxes).filter(cb => cb.checked).length;
+            const eligibleCount = Array.from(dpCheckboxes).filter(cb => shouldAutoPopulateTranche(cb.dataset.trancheId)).length;
+            
+            if (selectAllDp) {
+                // Select All should be checked only if all eligible (pending) tranches are checked
+                const checkedEligibleCount = Array.from(dpCheckboxes).filter(cb => 
+                    cb.checked && shouldAutoPopulateTranche(cb.dataset.trancheId)
+                ).length;
+                
+                selectAllDp.checked = checkedEligibleCount === eligibleCount && eligibleCount > 0;
+                selectAllDp.indeterminate = checkedCount > 0 && checkedEligibleCount < eligibleCount;
+            }
+        });
+    });
+
+    // Generate Combined Voucher button click
+    if (generateCombinedVoucherBtn) {
+        generateCombinedVoucherBtn.addEventListener('click', function() {
+            const selectedIds = document.getElementById('selected-tranche-ids').value;
+            if (selectedIds && selectedIds.split(',').length >= 1) {
+                // Trigger form submission
+                if (generateCombinedVoucherForm) {
+                    generateCombinedVoucherForm.submit();
+                }
+            } else {
+                alert('Please select at least 1 tranche to generate a voucher.');
+            }
+        });
+    }
+
+    // Form submission validation for combined voucher form ONLY
+    if (generateCombinedVoucherForm) {
+        generateCombinedVoucherForm.addEventListener('submit', function(e) {
+            const selectedIds = document.getElementById('selected-tranche-ids').value;
+            const selectedCount = selectedIds ? selectedIds.split(',').length : 0;
+            
+            if (selectedCount < 1) {
+                e.preventDefault();
+                alert('Please select at least 1 tranche to generate a voucher.');
+                return false;
+            }
+            
+            console.log('DEBUG: Voucher form submitting with tranche IDs:', selectedIds);
+        });
+    }
+
+    // Sync visible input fields with hidden fields for form submission
+    const receivedAmountInputs = document.querySelectorAll('.tranche-received-amount');
+    const dateReceivedInputs = document.querySelectorAll('.tranche-date-received');
+    
+    // Add event listeners to received amount inputs
+    receivedAmountInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const trancheId = this.dataset.trancheId;
+            const hiddenInput = document.querySelector(`.received-amount-hidden[data-tranche-id="${trancheId}"]`);
+            if (hiddenInput) {
+                hiddenInput.value = this.value;
+            }
+        });
+    });
+    
+    // Add event listeners to date received inputs
+    dateReceivedInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const trancheId = this.dataset.trancheId;
+            const hiddenInput = document.querySelector(`.date-received-hidden[data-tranche-id="${trancheId}"]`);
+            if (hiddenInput) {
+                hiddenInput.value = this.value;
+            }
+        });
+    });
+
+    // Main form submission - should work regardless of checkbox selection
+    const mainForm = document.querySelector('form[method="POST"]:not(#generate-combined-voucher-form)');
+    const mainSaveButton = document.getElementById('main-save-button');
+    
+    // Ensure main save button is always enabled and functional
+    if (mainSaveButton) {
+        // Remove any disabled attribute
+        mainSaveButton.removeAttribute('disabled');
+        mainSaveButton.disabled = false;
+        
+        // Add click event listener to ensure it works
+        mainSaveButton.addEventListener('click', function(e) {
+            console.log('DEBUG: Main save button clicked');
+            // Don't prevent default - let the form submit naturally
+            return true;
+        });
+        
+        console.log('DEBUG: Main save button setup complete');
+    }
+    
+    if (mainForm) {
+        mainForm.addEventListener('submit', function(e) {
+            console.log('DEBUG: Main form submitting - this should always work');
+            // Don't prevent default - allow normal form submission
+            return true;
+        });
+    }
+
     // Add focus effects to form sections
     document.querySelectorAll('.form-section').forEach(section => {
         section.addEventListener('mouseenter', function() {
@@ -300,7 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add input validation feedback
+    // Add input validation feedback and update checkbox data
     document.querySelectorAll('input[type="number"]').forEach(input => {
         input.addEventListener('input', function() {
             if (this.value && parseFloat(this.value) > 0) {
@@ -309,6 +737,40 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 this.style.borderColor = '#e5e7eb';
                 this.style.backgroundColor = '#ffffff';
+            }
+            
+            // Update corresponding checkbox data-actual-commission
+            if (this.name && this.name.startsWith('received_amount_')) {
+                const trancheId = this.name.replace('received_amount_', '');
+                const checkbox = document.querySelector(`input[data-tranche-id="${trancheId}"]`);
+                if (checkbox) {
+                    checkbox.dataset.actualCommission = this.value || '0';
+                    // Update selection summary if this tranche is selected
+                    if (checkbox.checked) {
+                        updateSelectionSummary();
+                    }
+                }
+                
+                // Update hidden field in individual form
+                const hiddenField = document.querySelector(`.received-amount-hidden[data-tranche-id="${trancheId}"]`);
+                if (hiddenField) {
+                    hiddenField.value = this.value || '0';
+                }
+            }
+        });
+    });
+    
+    // Add date input sync for individual forms
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.name && this.name.startsWith('date_received_')) {
+                const trancheId = this.name.replace('date_received_', '');
+                
+                // Update hidden field in individual form
+                const hiddenField = document.querySelector(`.date-received-hidden[data-tranche-id="${trancheId}"]`);
+                if (hiddenField) {
+                    hiddenField.value = this.value || '';
+                }
             }
         });
     });

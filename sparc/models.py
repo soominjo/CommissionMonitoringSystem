@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User  # Use Django's built-in User model
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.utils.timezone import now
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 Decimal('0.0')
 
 
@@ -150,13 +150,10 @@ class CommissionDetail(models.Model):
     agent_name = models.CharField(max_length=100, null=True, blank=True)
     partial_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=100)
     withholding_tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00)  # Add this field
+    percentage_of_particulars = models.DecimalField(max_digits=5, decimal_places=2, default=100, null=True, blank=True)  # Display-only field for particulars percentage
 
     def __str__(self):
         return f"{self.position} - {self.particulars}"
-
-
-
-
 
 
 class Commission(models.Model):
@@ -175,9 +172,6 @@ class Commission(models.Model):
     class Meta:
         ordering = ['-date_released']
 
-
-
-    
 
 class TrancheRecord(models.Model):
     project_name = models.CharField(max_length=255)
@@ -206,6 +200,71 @@ class TrancheRecord(models.Model):
 
     def __str__(self):
         return f"{self.project_name} - {self.buyer_name}"
+    
+    def delete(self, *args, **kwargs):
+        """
+        Custom delete method to ensure proper cleanup of all related voucher data.
+        This ensures referential integrity even if deletion happens outside of views.
+        Deletes:
+        - Individual vouchers (BillingInvoice objects)
+        - Individual commission records (DP-{id} and LTO-{id} format)
+        - Combined commission vouchers (COMBINED-DP-{id} format)
+        """
+        # Get all tranche payments before deletion for voucher cleanup
+        tranche_payments = list(self.payments.all())
+        
+        # Track what we're deleting for logging
+        individual_vouchers_count = 0
+        combined_vouchers_affected = set()
+        
+        # Delete individual vouchers (BillingInvoice objects)
+        for payment in tranche_payments:
+            # Count and delete all invoices (individual vouchers) for this tranche payment
+            invoices = payment.invoices.all()
+            individual_vouchers_count += invoices.count()
+            invoices.delete()
+            
+            # Track combined voucher numbers for deletion
+            if payment.combined_voucher_number:
+                combined_vouchers_affected.add(payment.combined_voucher_number)
+        
+        # Delete individual commission records using the tranche ID
+        tranche_id_str = str(self.id)
+        individual_commission_deleted = Commission.objects.filter(
+            Q(release_number__startswith=f'DP-{tranche_id_str}') | 
+            Q(release_number__startswith=f'LTO-{tranche_id_str}')
+        ).count()
+        Commission.objects.filter(
+            Q(release_number__startswith=f'DP-{tranche_id_str}') | 
+            Q(release_number__startswith=f'LTO-{tranche_id_str}')
+        ).delete()
+        
+        # Delete combined commission vouchers associated with this tranche
+        # Combined vouchers have format: COMBINED-DP-{record_id}-{tranche_numbers}
+        combined_commission_deleted = 0
+        if combined_vouchers_affected:
+            for voucher_number in combined_vouchers_affected:
+                # Delete the Commission record for this combined voucher
+                deleted_count = Commission.objects.filter(release_number=voucher_number).count()
+                Commission.objects.filter(release_number=voucher_number).delete()
+                combined_commission_deleted += deleted_count
+            
+            # Unlink any other tranches that were part of these combined vouchers
+            # This prevents orphaned references in other tranche records
+            TranchePayment.objects.filter(
+                combined_voucher_number__in=combined_vouchers_affected
+            ).update(combined_voucher_number=None)
+        
+        # Log the cleanup for debugging
+        print(f"TrancheRecord {self.id} deletion cleanup: "
+              f"{individual_vouchers_count} individual vouchers, "
+              f"{individual_commission_deleted} individual commission records, "
+              f"{combined_commission_deleted} combined commission records, "
+              f"{len(combined_vouchers_affected)} combined voucher(s) deleted")
+        
+        # Call the parent delete method to actually delete the record
+        # This will cascade delete TranchePayment objects due to the ForeignKey relationship
+        super().delete(*args, **kwargs)
 
 class TranchePayment(models.Model):
     tranche_record = models.ForeignKey(TrancheRecord, on_delete=models.CASCADE, related_name='payments')
@@ -217,6 +276,7 @@ class TranchePayment(models.Model):
     is_lto = models.BooleanField(default=False)  # To distinguish between DP and LTO tranches
     status = models.CharField(max_length=20, default='Pending')  # Pending, Partial, Received
     initial_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)  # Add initial balance field
+    combined_voucher_number = models.CharField(max_length=100, null=True, blank=True)  # Track which combined voucher this tranche belongs to
 
     def __str__(self):
         return f"Tranche {self.tranche_number} for {self.tranche_record.project_name}"
@@ -301,6 +361,7 @@ class CommissionDetail3(models.Model):
     partial_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=100)
     withholding_tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00)
     is_supervisor = models.BooleanField(default=False)  # New field to distinguish supervisor from agent
+    percentage_of_particulars = models.DecimalField(max_digits=5, decimal_places=2, default=100, null=True, blank=True)  # Display-only field for particulars percentage
 
     def __str__(self):
         return f"{self.position} - {self.particulars}"

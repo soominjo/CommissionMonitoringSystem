@@ -1,323 +1,1024 @@
 {% extends "index.html" %}
 
 {% load widget_tweaks %}
-
 {% load humanize %}
 
 {% block content %}
-
 {% load static %}
 
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ============================================
+           BASE STYLES & COLOR VARIABLES
+           ============================================ */
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-green: #10b981;
+            --primary-gradient: linear-gradient(135deg, #436cf5 0%, #3b82f6 100%);
+            --light-bg: #f9fafb;
+            --card-border: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --focus-ring: rgba(59, 130, 246, 0.1);
+        }
+
+        /* ============================================
+           RESPONSIVE TWO-COLUMN CONTAINER
+           ============================================ */
+        .commission-form-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding: 0;
+        }
+
+        @media (min-width: 1280px) {
+            .commission-form-wrapper {
+                grid-template-columns: 1.5fr 1fr;
+                gap: 2rem;
+            }
+        }
+
+        /* ============================================
+           FORM SECTION STYLES
+           ============================================ */
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-section:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--card-border);
+        }
+
+        .section-icon {
+            font-size: 1.25rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+        }
+
+        .section-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary-blue);
+        }
+
+        .section-icon.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary-green);
+        }
+
+        .section-icon.purple {
+            background: rgba(147, 51, 234, 0.1);
+            color: #9333ea;
+        }
+
+        .section-icon.orange {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+
+        /* ============================================
+           FORM INPUT STYLES
+           ============================================ */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--card-border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            background: white;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .form-input:hover,
+        .form-select:hover {
+            border-color: #9ca3af;
+            background: #fafbfc;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px var(--focus-ring);
+            background: white;
+        }
+
+        .form-input[readonly] {
+            background: #f3f4f6;
+            cursor: not-allowed;
+            color: #9ca3af;
+        }
+
+        /* Currency Input Styling */
+        .currency-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            pointer-events: none;
+        }
+
+        .currency-input-group .form-input {
+            padding-left: 2rem;
+        }
+
+        .percent-symbol {
+            position: absolute;
+            right: 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            pointer-events: none;
+        }
+
+        .percent-input-group .form-input {
+            padding-right: 2rem;
+        }
+
+        /* Grid Layouts */
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-2-col {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .grid-4-col {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-4-col {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .grid-4-col {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Conditional Field Display */
+        .conditional-field {
+            display: none;
+        }
+
+        .conditional-field.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================
+           CALCULATION PANEL STYLES (RIGHT COLUMN)
+           ============================================ */
+        .calculation-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .calculation-panel {
+            background: linear-gradient(135deg, var(--light-bg) 0%, #f0fdf4 100%);
+            border-radius: 1rem;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        @media (min-width: 1280px) {
+            .calculation-panel {
+                position: sticky;
+                top: 2rem;
+                max-height: calc(100vh - 4rem);
+                overflow-y: auto;
+            }
+        }
+
+        .calculation-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .calculation-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        .calculation-panel::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 3px;
+        }
+
+        .calculation-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.5);
+        }
+
+        .calculation-card {
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calculation-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .calculation-card .section-header {
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .calculation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.875rem;
+        }
+
+        .calculation-row:last-child {
+            border-bottom: none;
+        }
+
+        .calculation-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .calculation-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .calculation-row.total {
+            background: rgba(59, 130, 246, 0.05);
+            padding: 1rem;
+            margin: 1rem -1.25rem -1.25rem -1.25rem;
+            border-radius: 0 0 0.75rem 0.75rem;
+            border-top: 2px solid var(--primary-blue);
+        }
+
+        .calculation-row.total .calculation-label {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .calculation-row.total .calculation-value {
+            color: var(--primary-blue);
+            font-size: 1rem;
+        }
+
+        /* ============================================
+           TABLE STYLES (POSITION BREAKDOWN)
+           ============================================ */
+        .breakdown-table-wrapper {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid var(--card-border);
+        }
+
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        .breakdown-table thead th {
+            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--primary-blue);
+            white-space: nowrap;
+        }
+
+        .breakdown-table tbody td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+            color: var(--text-secondary);
+        }
+
+        .breakdown-table tbody tr:hover {
+            background: #fafbfc;
+        }
+
+        .breakdown-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .breakdown-table tfoot td {
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 700;
+            padding: 0.75rem;
+            border-bottom: none;
+        }
+
+        .breakdown-table .amount {
+            font-family: 'ari', sans-serif;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* ============================================
+           BUTTON STYLES
+           ============================================ */
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1.5rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-back:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ============================================
+           ERROR MESSAGE STYLES
+           ============================================ */
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-error strong {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-error ul {
+            list-style-position: inside;
+            margin-top: 0.5rem;
+        }
+
+        /* ============================================
+           HEADER STYLES
+           ============================================ */
+        .form-header {
+            background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+            border-bottom: 1px solid var(--card-border);
+            padding: 2rem 1.5rem;
+            border-radius: 1rem 1rem 0 0;
+            text-align: center;
+        }
+
+        .form-header h1 {
+            font-size: 1.875rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .form-tab {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-tab:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .form-tab.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+
+        /* ============================================
+           RESPONSIVE ADJUSTMENTS
+           ============================================ */
+        @media (max-width: 1279px) {
+            .form-section,
+            .calculation-card {
+                margin-bottom: 1rem;
+            }
+
+            .btn-submit {
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .form-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .section-header {
+                font-size: 1rem;
+            }
+
+            .breakdown-table {
+                font-size: 0.7rem;
+            }
+
+            .breakdown-table th,
+            .breakdown-table td {
+                padding: 0.5rem;
+            }
+
+            .grid-4-col {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-tabs {
+                flex-direction: column;
+            }
+
+            .form-tab {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .grid-2-col,
+            .grid-4-col {
+                grid-template-columns: 1fr;
+            }
+
+            .breakdown-table {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
 </head>
 
-<div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-6xl mx-auto">
-        <!-- Header Card -->
-        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div class="p-6 md:p-8">
-                <div class="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
-                    <div class="bg-white p-3 rounded-2xl shadow-lg">
-                        <img src="{% static 'media/LOGO.png' %}" alt="Company Logo" class="w-16 h-16 md:w-20 md:h-20 object-contain">
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header Card with Logo -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
+            <div class="p-6">
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <div class="bg-gradient-to-br from-blue-50 to-green-50 p-3 border border-blue-200 rounded-xl flex-shrink-0">
+                        <img src="{% static 'media/LOGO.png' %}" alt="Company Logo" class="w-14 h-14 object-contain">
                     </div>
-                    <div class="text-center md:text-left text-white">
-                        <h2 class="text-2xl md:text-3xl font-bold mb-2">Inner SPARC Realty Corporation</h2>
-                        <div class="text-sm md:text-base space-y-1 opacity-90">
+                    <div class="text-center sm:text-left flex-1">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-1">Inner SPARC Realty Corporation</h2>
+                        <div class="text-sm text-gray-600 space-y-1">
                             <p>Main Office: Block 26 Lot 4 Phase 3 Avida Residences Sta. Catalina</p>
-                            <p>Salawag, Dasmariñas, Cavite 4114</p>
-                            <p>63917-853-4875/63999-994-3304/(046)458 0706</p>
+                            <p>Salawag, Dasmariñas, Cavite 4114 | 63917-853-4875/63999-994-3304/(046)458 0706</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Form -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                    Create Management Commission Slip
-                </span>
-            </h1>
-
-            <!-- Commission Slip Type Selector -->
-            <div class="flex justify-center mb-8">
-                <div class="flex rounded-xl shadow-sm bg-gray-100 p-1 gap-1">
+        <!-- Main Form Container -->
+        <div class="rounded-xl  overflow-hidden">
+            <!-- Form Header with Tabs -->
+            <div class="form-header">
+                <h1 class="mb-4"><i class="fas fa-file-invoice mr-3"></i>Create Management Commission Slip</h1>
+                
+                <div class="form-tabs">
                     {% if user.is_superuser or user.is_staff %}
-                        <a href="{% url 'create_commission_slip' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors">Agent</a>
-                        <a href="{% url 'create_commission_slip2' %}" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">Management</a>
-                        <a href="{% url 'create_commission_slip3' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors">Supervisor-Agent</a>
+                        <a href="{% url 'create_commission_slip' %}" class="form-tab">
+                            <i class="fas fa-user"></i> Agent
+                        </a>
+                        <a href="{% url 'create_commission_slip2' %}" class="form-tab active">
+                            <i class="fas fa-users-cog"></i> Management
+                        </a>
+                        <a href="{% url 'create_commission_slip3' %}" class="form-tab">
+                            <i class="fas fa-user-tie"></i> Supervisor-Agent
+                        </a>
                     {% elif user.profile.role == 'Sales Manager' or user.profile.role == 'Sales Supervisor' %}
-                        <a href="{% url 'create_commission_slip' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors">Agent</a>
-                        <a href="{% url 'create_commission_slip3' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors">Supervisor-Agent</a>
+                        <a href="{% url 'create_commission_slip' %}" class="form-tab">
+                            <i class="fas fa-user"></i> Agent
+                        </a>
+                        <a href="{% url 'create_commission_slip3' %}" class="form-tab">
+                            <i class="fas fa-user-tie"></i> Supervisor-Agent
+                        </a>
                     {% endif %}
                 </div>
             </div>
 
+            <!-- Error Messages -->
             {% if slip_form.errors %}
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                    <strong class="font-bold">Error!</strong>
-                    <span class="block sm:inline">Please correct the following errors:</span>
-                    <ul class="list-disc list-inside mt-2">
-                        {% for field, errors in slip_form.errors.items %}
-                            {% for error in errors %}
-                                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                <div class="px-6 pt-6">
+                    <div class="alert-error">
+                        <strong><i class="fas fa-exclamation-circle mr-2"></i>Errors Found</strong>
+                        <ul>
+                            {% for field, errors in slip_form.errors.items %}
+                                {% for error in errors %}
+                                    <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                                {% endfor %}
                             {% endfor %}
-                        {% endfor %}
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
             {% endif %}
 
-            <form method="POST" action="{% url 'create_commission_slip2' %}" class="space-y-8">
-                {% csrf_token %}
+            <!-- Form Content -->
+            <div class="p-6">
+                <form method="POST" action="{% url 'create_commission_slip2' %}" class="space-y-6">
+                    {% csrf_token %}
 
-                <!-- Project Details Section -->
-                <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
-                    <div class="flex items-center mb-6">
-                        <div class="h-8 w-1 bg-blue-600 rounded-full mr-3"></div>
-                        <h2 class="text-xl font-semibold text-gray-800">Project Details</h2>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {% if user.is_superuser or user.is_staff %}
-                        <div>
-                            <label for="agent_select" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-user-tie mr-2 text-blue-500"></i>Select Sales Manager</label>
-                            <select name="agent_select" id="agent_select" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm" onchange="updateAgentInfo()">
-                                <option value="">Select a Sales Manager</option>
-                                {% for user in active_users %}
-                                    {% if user.profile.role == 'Sales Manager' %}
-                                        <option value="{{ user.id }}" data-name="{{ user.get_full_name }}" data-position="{{ user.profile.role }}">
-                                            {{ user.get_full_name }} ({{ user.profile.team.display_name }})
-                                        </option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                        </div>
-                        {% endif %}
-                        
-                        <div>
-                            <label for="sales_agent_name" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-signature mr-2 text-blue-500"></i>Name</label>
-                            <input type="text" id="agent_name_display" readonly class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 shadow-sm">
-                        </div>
-                        <br>
-                        
-                        <div>
-                            <label for="position" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-user-tag mr-2 text-blue-500"></i>Position</label>
-                            <input type="text" id="position_display" readonly class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 shadow-sm">
-                        </div>
+                    <!-- TWO COLUMN LAYOUT -->
+                    <div class="commission-form-wrapper">
+                        <!-- LEFT COLUMN: FORM FIELDS -->
+                        <div class="form-column">
+                            
+                            <!-- Project Details Section -->
+                            <div class="form-section">
+                                <div class="section-header">
+                                    <div class="section-icon blue"><i class="fas fa-building"></i></div>
+                                    <span>Project Details</span>
+                                </div>
 
-                       
+                                {% if user.is_superuser or user.is_staff %}
+                                <div class="form-group mb-4">
+                                    <label class="form-label">Select Sales Manager</label>
+                                    <select name="agent_select" id="agent_select" class="form-select" onchange="updateAgentInfo()">
+                                        <option value="">Choose a Sales Manager...</option>
+                                        {% for user in active_users %}
+                                            {% if user.profile.role == 'Sales Manager' %}
+                                                <option value="{{ user.id }}" data-name="{{ user.get_full_name }}" data-position="{{ user.profile.role }}">
+                                                    {{ user.get_full_name }} ({{ user.profile.team.display_name }})
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% endif %}
 
-                        <div>
-                            <label for="buyer_name" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-user mr-2 text-blue-500"></i>Buyer Name</label>
-                            {{ slip_form.buyer_name|add_class:"w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" }}
-                        </div>
+                                <div class="grid-2-col">
+                                    <div class="form-group">
+                                        <label class="form-label">Name</label>
+                                        <input type="text" id="agent_name_display" readonly class="form-input" placeholder="Auto-filled">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Position</label>
+                                        <input type="text" id="position_display" readonly class="form-input" placeholder="Auto-filled">
+                                    </div>
+                                </div>
 
-                        <div>
-                            <label for="project_name" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-building mr-2 text-blue-500"></i>Project Name</label>
-                            <select name="project_name" id="project_name" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" required>
-                                <option value="">Select a project</option>
-                                {% for property in properties %}
-                                    <option value="{{ property.name }}">{{ property.name }}{% if property.developer %} - {{ property.developer.name }}{% endif %}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                                <br>
 
-                        <div>
-                            <label for="unit_id" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-home mr-2 text-blue-500"></i>Unit ID</label>
-                            {{ slip_form.unit_id|add_class:"w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" }}
-                        </div>
-                    </div>
-                </div>
+                                <div class="grid-2-col">
+                                    <div class="form-group">
+                                        <label class="form-label">Buyer Name</label>
+                                        {{ slip_form.buyer_name|add_class:"form-input" }}
+                                    </div>
 
-                <!-- Commission Details Section -->
-                <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
-                    <div class="flex items-center mb-6">
-                        <div class="h-8 w-1 bg-blue-600 rounded-full mr-3"></div>
-                        <h2 class="text-xl font-semibold text-gray-800">Commission Details</h2>
-                    </div>
-                    
-                    <div class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="total_selling_price" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-money-bill-wave mr-2 text-blue-500"></i>Total Selling Price</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-3 text-gray-500">₱</span>
-                                    <input type="number" step="0.01" name="total_selling_price" id="total_selling_price" class="w-full p-3 pl-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Enter amount" required onchange="updateCommissionPreview()">
+                                    <div class="form-group">
+                                        <label class="form-label">Project Name</label>
+                                        <select name="project_name" id="project_name" class="form-select" required>
+                                            <option value="">Select a project...</option>
+                                            {% for property in properties %}
+                                                <option value="{{ property.name }}">{{ property.name }}{% if property.developer %} - {{ property.developer.name }}{% endif %}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Unit ID</label>
+                                    {{ slip_form.unit_id|add_class:"form-input" }}
                                 </div>
                             </div>
 
-                            <div>
-                                <label for="manager_commission_rate" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-percent mr-2 text-blue-500"></i>Manager Commission Rate</label>
-                                <div class="relative">
-                                    <input type="number" step="0.01" name="manager_commission_rate" id="manager_commission_rate" value="3.00" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Enter rate" required onchange="updateCommissionPreview()">
-                                    <span class="absolute right-3 top-3 text-gray-500">%</span>
+                            <!-- Commission Details Section -->
+                            <div class="form-section">
+                                <div class="section-header">
+                                    <div class="section-icon green"><i class="fas fa-calculator"></i></div>
+                                    <span>Commission Details</span>
                                 </div>
-                            </div>
 
-                            <div>
-                                <label for="particulars" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-list mr-2 text-blue-500"></i>Particulars</label>
-                                <select name="particulars" id="particulars" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" onchange="updateFieldsVisibility(); updateCommissionPreview();">
-                                    <option value="FULL COMM">FULL COMM</option>
-                                    <option value="PARTIAL COMM">PARTIAL COMM</option>
-                                    <option value="INCENTIVES">INCENTIVES</option>
-                                    <option value="CASH ADVANCE">CASH ADVANCE</option>
-                                </select>
+                                <div class="grid-2-col mb-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Total Selling Price</label>
+                                        <div class="currency-input-group">
+                                            <span class="currency-symbol">₱</span>
+                                            <input type="number" step="0.01" name="total_selling_price" id="total_selling_price" class="form-input" placeholder="0.00" required onchange="updateCommissionPreview()">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Manager Rate</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="manager_commission_rate" id="manager_commission_rate" value="3.50" class="form-input" required onchange="updateCommissionPreview()">
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid-2-col mb-4">
+                                    <div class="form-group">
+                                        <label class="form-label">VAT Rate</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="vat_rate" id="vat_rate" value="12.00" class="form-input" onchange="updateCommissionPreview()">
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Withholding Tax</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="withholding_tax_percentage" id="withholding_tax_percentage" value="10.00" class="form-input" onchange="updateCommissionPreview()">
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label class="form-label">Particulars</label>
+                                    <select name="particulars" id="particulars" class="form-select" onchange="updateFieldsVisibility(); updateCommissionPreview();">
+                                        <option value="FULL COMM">FULL COMM</option>
+                                        <option value="PARTIAL COMM">PARTIAL COMM</option>
+                                        <option value="INCENTIVES">INCENTIVES</option>
+                                        <option value="CASH ADVANCE">CASH ADVANCE</option>
+                                    </select>
+                                </div>
+
+                                <!-- Conditional Fields -->
+                                <div class="conditional-field cash-advance-field">
+                                    <div class="form-group">
+                                        <label class="form-label">Cash Advance</label>
+                                        <div class="currency-input-group">
+                                            <span class="currency-symbol">₱</span>
+                                            <input type="number" step="0.01" name="cash_advance" id="cash_advance" class="form-input" placeholder="0.00" value="0" onchange="updateCommissionPreview()">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="conditional-field partial-field">
+                                    <div class="form-group">
+                                        <label class="form-label">Percentage of Commission</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="partial_percentage" id="partial_percentage" value="100" class="form-input" onchange="updateCommissionPreview()">
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Applied to all commission amounts</p>
+                                    </div>
+                                </div>
+
+                                <div class="conditional-field incentive-field">
+                                    <div class="form-group">
+                                        <label class="form-label">Incentive Amount</label>
+                                        <div class="currency-input-group">
+                                            <span class="currency-symbol">₱</span>
+                                            <input type="number" step="0.01" name="incentive_amount" id="incentive_amount" class="form-input" placeholder="0.00" value="0" onchange="updateCommissionPreview()">
+                                        </div>
+                                    </div>
+                                </div>
+
+                           
+                                <div class="form-group">
+                                    <label class="form-label">Percentage of Particulars (Display Only)</label>
+                                    <div class="percent-input-group">
+                                        <input type="number" step="0.01" name="percentage_of_particulars" id="percentage_of_particulars" value="100" class="form-input">
+                                        <span class="percent-symbol">%</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">For reference/printing only</p>
+                                </div>
+
+                                <div id="positions-container"></div>
                             </div>
                             
-                            <div class="cash-advance-field" style="display: none;">
-                                <label for="cash_advance" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-money-check mr-2 text-blue-500"></i>Cash Advance</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-3 text-gray-500">₱</span>
-                                    <input type="number" step="0.01" name="cash_advance" id="cash_advance" class="w-full p-3 pl-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Enter cash advance amount" value="0" onchange="updateCommissionPreview()">
-                                </div>
-                            </div>
 
-                            <div class="partial-field col-span-2" style="display: none;">
-                                <label for="partial_percentage" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-chart-pie mr-2 text-blue-500"></i>Percentage of Commission Amount</label>
-                                <div class="relative">
-                                    <input type="number" step="0.01" name="partial_percentage" id="partial_percentage" value="100" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Enter percentage" onchange="updateCommissionPreview()">
-                                    <span class="absolute right-3 top-3 text-gray-500">%</span>
+                            <!-- Other Position Rates Section -->
+                            <div class="form-section">
+                                <div class="section-header">
+                                    <div class="section-icon purple"><i class="fas fa-users"></i></div>
+                                    <span>Other Position Rates</span>
                                 </div>
-                                <p class="text-sm text-gray-500 mt-1">This percentage will be applied to all commission amounts</p>
-                            </div>
-                        </div>
 
-                        <div id="positions-container">
-                            <!-- Hidden fields for positions will be added here by JS -->
-                        </div>
-
-                        <div class="bg-white rounded-lg p-4 border border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-700 mb-4">Other Position Commission Rates</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Operation Manager</label>
-                                    <div class="relative">
-                                        <input type="number" name="commission_rate" id="om_rate" step="0.01" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Rate" onchange="updateCommissionPreview()">
-                                        <span class="absolute right-3 top-3 text-gray-500">%</span>
+                                <div class="grid-2-col">
+                                    <div class="form-group">
+                                        <label class="form-label">Operations Manager</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" name="commission_rate" id="om_rate" step="0.01" value="0.25" class="form-input" onchange="updateCommissionPreview()">
+                                            <span class="percent-symbol">%</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Co-Founder</label>
-                                    <div class="relative">
-                                        <input type="number" name="commission_rate" id="cf_rate" step="0.01" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Rate" onchange="updateCommissionPreview()">
-                                        <span class="absolute right-3 top-3 text-gray-500">%</span>
+                                    <div class="form-group">
+                                        <label class="form-label">Co-Founder</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" name="commission_rate" id="cf_rate" step="0.01" value="0.25" class="form-input" onchange="updateCommissionPreview()">
+                                            <span class="percent-symbol">%</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Founder</label>
-                                    <div class="relative">
-                                        <input type="number" name="commission_rate" id="founder_rate" step="0.01" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Rate" onchange="updateCommissionPreview()">
-                                        <span class="absolute right-3 top-3 text-gray-500">%</span>
+                                    <div class="form-group">
+                                        <label class="form-label">Founder</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" name="commission_rate" id="founder_rate" step="0.01" value="0.50" class="form-input" onchange="updateCommissionPreview()">
+                                            <span class="percent-symbol">%</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Funds</label>
-                                    <div class="relative">
-                                        <input type="number" name="commission_rate" id="funds_rate" step="0.01" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Rate" onchange="updateCommissionPreview()">
-                                        <span class="absolute right-3 top-3 text-gray-500">%</span>
+                                    <div class="form-group">
+                                        <label class="form-label">Funds</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" name="commission_rate" id="funds_rate" step="0.01" value="2.50" class="form-input" onchange="updateCommissionPreview()">
+                                            <span class="percent-symbol">%</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="date" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-calendar-alt mr-2 text-blue-500"></i>Date</label>
-                                <input type="date" name="date" id="date" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" required>
-                            </div>
-                            <div>
-                                <label for="withholding_tax_rate" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-file-invoice-dollar mr-2 text-blue-500"></i>Sales Manager Tax Rate</label>
-                                <div class="relative">
-                                    <input type="number" step="0.01" name="withholding_tax_rate" id="withholding_tax_rate" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="Enter tax rate" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
-                                    <span class="absolute right-3 top-3 text-gray-500">%</span>
+                            <!-- Tax Rates & Date Section -->
+                            <div class="form-section">
+                                <div class="section-header">
+                                    <div class="section-icon orange"><i class="fas fa-calendar-alt"></i></div>
+                                    <span>Tax Rates & Date</span>
                                 </div>
-                            </div>
-                            <div>
-                                <label for="operation_manager_tax_rate" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-file-invoice-dollar mr-2 text-blue-500"></i>Operation Manager Tax Rate</label>
-                                <div class="relative">
-                                    <input type="number" step="0.01" name="operation_manager_tax_rate" id="operation_manager_tax_rate" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="Enter tax rate" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
-                                    <span class="absolute right-3 top-3 text-gray-500">%</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="co_founder_tax_rate" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-file-invoice-dollar mr-2 text-blue-500"></i>Co-Founder Tax Rate</label>
-                                <div class="relative">
-                                    <input type="number" step="0.01" name="co_founder_tax_rate" id="co_founder_tax_rate" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="Enter tax rate" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
-                                    <span class="absolute right-3 top-3 text-gray-500">%</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="founder_tax_rate" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-file-invoice-dollar mr-2 text-blue-500"></i>Founder Tax Rate</label>
-                                <div class="relative">
-                                    <input type="number" step="0.01" name="founder_tax_rate" id="founder_tax_rate" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="Enter tax rate" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
-                                    <span class="absolute right-3 top-3 text-gray-500">%</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="funds_tax_rate" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-file-invoice-dollar mr-2 text-blue-500"></i>Funds Tax Rate</label>
-                                <div class="relative">
-                                    <input type="number" step="0.01" name="funds_tax_rate" id="funds_tax_rate" class="w-full p-3 pr-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm bg-white" placeholder="Enter tax rate" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
-                                    <span class="absolute right-3 top-3 text-gray-500">%</span>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="incentive-field" style="display: none;">
-                            <label for="incentive_amount" class="block text-sm font-medium text-gray-700 mb-2"><i class="fas fa-gift mr-2 text-blue-500"></i>Incentive Amount</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-3 text-gray-500">₱</span>
-                                <input type="number" name="incentive_amount" id="incentive_amount" value="0" class="w-full p-3 pl-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" step="0.01" onchange="updateCommissionPreview()">
-                            </div>
-                        </div>
+                                <div class="grid-2-col mb-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Date</label>
+                                        <input type="date" name="date" id="date" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Sales Manager Tax</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="withholding_tax_rate" id="withholding_tax_rate" class="form-input" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
 
-                        <div class="mt-8 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                            <h3 class="text-lg font-medium text-gray-700 mb-4 flex items-center"><i class="fas fa-calculator mr-2 text-blue-500"></i>Commission Breakdown Preview</h3>
-                            <div class="overflow-x-auto">
-                                <table class="w-full border-collapse rounded-lg overflow-hidden">
-                                    <thead class="bg-blue-100">
-                                        <tr>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Position</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rate</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Percentage</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Gross Commission</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Tax</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Net Commission</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200" id="previewTableBody"></tbody>
-                                    <tfoot class="bg-blue-50 font-semibold">
-                                        <tr id="totalRow">
-                                            <td class="px-4 py-3" colspan="3">TOTAL</td>
-                                            <td class="px-4 py-3" id="totalGrossCommission">₱0.00</td>
-                                            <td class="px-4 py-3" id="totalTax">₱0.00</td>
-                                            <td class="px-4 py-3" id="totalNetCommission">₱0.00</td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                                <div class="grid-4-col">
+                                    <div class="form-group">
+                                        <label class="form-label text-xs">Operations Tax</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="operation_manager_tax_rate" id="operation_manager_tax_rate" class="form-input" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label text-xs">Co-Founder Tax</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="co_founder_tax_rate" id="co_founder_tax_rate" class="form-input" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label text-xs">Founder Tax</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="founder_tax_rate" id="founder_tax_rate" class="form-input" value="10.00" min="0" max="100" onchange="updateCommissionPreview()" required>
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label text-xs text-gray-400">Funds Tax</label>
+                                        <div class="percent-input-group">
+                                            <input type="number" step="0.01" name="funds_tax_rate" id="funds_tax_rate" class="form-input" value="0.00" readonly disabled>
+                                            <span class="percent-symbol">%</span>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-1">Non-taxable</p>
+                                    </div>
+                                </div>
                             </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-save"></i> Save Commission Slip
+                            </button>
                         </div>
+                        <!-- END LEFT COLUMN -->
+
+                        <!-- RIGHT COLUMN: CALCULATION DISPLAY -->
+                        <div class="calculation-column">
+
+                            
+                            <!-- VAT Compliant Calculation Card -->
+                            <div class="calculation-card">
+                                <div class="section-header">
+                                    <div class="section-icon blue"><i class="fas fa-chart-line"></i></div>
+                                    <span>VAT-Compliant Calculation</span>
+                                </div>
+
+                                <div class="space-y-0">
+                                    <div class="calculation-row">
+                                        <span class="calculation-label">1. Total Commission Rate</span>
+                                        <span class="calculation-value" id="totalCommissionRateDisplay">0.00%</span>
+                                    </div>
+                                    
+                                    <div class="calculation-row">
+                                        <span class="calculation-label">2. Total Gross Commission</span>
+                                        <span class="calculation-value" id="totalGrossCommissionDisplay">₱0.00</span>
+                                    </div>
+                                    
+                                    <div class="calculation-row">
+                                        <span class="calculation-label">3. VATABLE Amount</span>
+                                        <span class="calculation-value" id="vatableAmountDisplay">₱0.00</span>
+                                    </div>
+                                    
+                                    <div class="calculation-row">
+                                        <span class="calculation-label">4. Total Tax Deductions</span>
+                                        <span class="calculation-value" id="totalTaxDeductionsDisplay">₱0.00</span>
+                                    </div>
+                                    
+                                    <div class="calculation-row total">
+                                        <span class="calculation-label">NET COMMISSION</span>
+                                        <span class="calculation-value" id="finalNetCommissionDisplay">₱0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Position Breakdown Card -->
+                            <div class="calculation-card">
+                                <div class="section-header">
+                                    <div class="section-icon green"><i class="fas fa-table"></i></div>
+                                    <span>Position Breakdown</span>
+                                </div>
+
+                                <div class="breakdown-table-wrapper">
+                                    <table class="breakdown-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Position</th>
+                                                <th>Particulars</th>
+                                                <th>Rate</th>
+                                                <th>Gross</th>
+                                                <th>Tax</th>
+                                                <th>Net</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="previewTableBody"></tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="3">TOTAL</td>
+                                                <td class="amount" id="totalGrossCommission">₱0.00</td>
+                                                <td class="amount" id="totalWithholding">₱0.00</td>
+                                                <td class="amount" id="totalNetCommission">₱0.00</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- END RIGHT COLUMN -->
                     </div>
-                </div>
+                    <!-- END TWO COLUMN LAYOUT -->
 
-                <!-- Submit and Back Buttons -->
-                <div class="flex justify-center items-center gap-4 mt-8">
-                    <a href="{% url 'commission_history' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Go Back
-                    </a>
-                    <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg transform hover:-translate-y-0.5">
-                        <i class="fas fa-save mr-2"></i>
-                        Save Commission Slip
-                    </button>
-                </div>
-            </form>
+                    <!-- Back Button -->
+                    <div class="flex justify-center pt-6 border-t border-gray-200">
+                        <a href="{% url 'commission_history' %}" class="btn-back">
+                            <i class="fas fa-arrow-left"></i>
+                            Go Back to Commission History
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+    const userRole = '{{ user.profile.role|default:"" }}';
+    const isSuper = {% if user.is_superuser %}true{% else %}false{% endif %};
+    const isStaff = {% if user.is_staff %}true{% else %}false{% endif %};
+    
     function formatCurrency(amount) {
         return amount.toLocaleString('en-US', {
             minimumFractionDigits: 2,
@@ -327,15 +1028,23 @@
 
     function updateFieldsVisibility() {
         const particularsSelect = document.getElementById('particulars');
-        const incentiveField = document.querySelector('.incentive-field');
-        const partialField = document.querySelector('.partial-field');
-        const cashAdvanceField = document.querySelector('.cash-advance-field');
         const selectedValue = particularsSelect.value;
 
-        incentiveField.style.display = selectedValue === 'INCENTIVES' ? 'block' : 'none';
-        partialField.style.display = selectedValue === 'PARTIAL COMM' ? 'block' : 'none';
-        cashAdvanceField.style.display = selectedValue === 'CASH ADVANCE' ? 'block' : 'none';
+        // Hide all conditional fields
+        document.querySelectorAll('.conditional-field').forEach(field => {
+            field.classList.remove('active');
+        });
 
+        // Show relevant conditional fields
+        if (selectedValue === 'INCENTIVES') {
+            document.querySelector('.incentive-field').classList.add('active');
+        } else if (selectedValue === 'PARTIAL COMM') {
+            document.querySelector('.partial-field').classList.add('active');
+        } else if (selectedValue === 'CASH ADVANCE') {
+            document.querySelector('.cash-advance-field').classList.add('active');
+        }
+
+        // Reset values
         if (selectedValue !== 'PARTIAL COMM') document.getElementById('partial_percentage').value = '100';
         if (selectedValue !== 'INCENTIVES') document.getElementById('incentive_amount').value = '0';
         if (selectedValue !== 'CASH ADVANCE') document.getElementById('cash_advance').value = '0';
@@ -344,74 +1053,98 @@
     }
 
     function updateCommissionPreview() {
-        const totalSellingPrice = parseFloat(document.getElementById('total_selling_price').value) || 0;
+        const netSellingPrice = parseFloat(document.getElementById('total_selling_price').value) || 0;
         const cashAdvance = parseFloat(document.getElementById('cash_advance').value) || 0;
         const particulars = document.getElementById('particulars').value;
         const partialPercentage = parseFloat(document.getElementById('partial_percentage').value) || 100;
         const incentiveAmount = parseFloat(document.getElementById('incentive_amount').value) || 0;
-
-        let totalGrossCommission = 0, totalTax = 0, totalNetCommission = 0;
-
-        const agentTaxRate = parseFloat(document.getElementById('withholding_tax_rate').value) || 10;
+        
+        const vatRate = parseFloat(document.getElementById('vat_rate').value) || 0;
+        const withholdingTaxPercentage = parseFloat(document.getElementById('withholding_tax_percentage').value) || 0;
+        
+        const salesManagerTaxRate = parseFloat(document.getElementById('withholding_tax_rate').value) || 10;
         const operationManagerTaxRate = parseFloat(document.getElementById('operation_manager_tax_rate').value) || 10;
         const coFounderTaxRate = parseFloat(document.getElementById('co_founder_tax_rate').value) || 10;
         const founderTaxRate = parseFloat(document.getElementById('founder_tax_rate').value) || 10;
-        const fundsTaxRate = parseFloat(document.getElementById('funds_tax_rate').value) || 10;
-
-        const cashAdvanceTax = cashAdvance * 0.10;
-        const netCashAdvance = cashAdvance - cashAdvanceTax;
-        const adjustedTotal = totalSellingPrice - netCashAdvance;
 
         const selectedPosition = document.getElementById('position_display').value || 'Sales Manager';
-
         const positionsContainer = document.getElementById('positions-container');
-        positionsContainer.innerHTML = ''; // Clear previous hidden fields
+        positionsContainer.innerHTML = '';
 
         const positions = [
-            { id: 'manager_commission_rate', name: selectedPosition, taxRate: agentTaxRate, is_primary: true },
+            { id: 'manager_commission_rate', name: selectedPosition, taxRate: salesManagerTaxRate, is_primary: true },
             { id: 'om_rate', name: 'Operation Manager', taxRate: operationManagerTaxRate, is_primary: false },
             { id: 'cf_rate', name: 'Co-Founder', taxRate: coFounderTaxRate, is_primary: false },
             { id: 'founder_rate', name: 'Founder', taxRate: founderTaxRate, is_primary: false },
-            { id: 'funds_rate', name: 'Funds', taxRate: fundsTaxRate, is_primary: false }
+            { id: 'funds_rate', name: 'Funds', taxRate: 0, is_primary: false }
         ];
 
+        let totalCommissionRate = 0;
+        positions.forEach(pos => {
+            const rateInput = document.getElementById(pos.id);
+            const rate = parseFloat(rateInput ? rateInput.value : 0) || 0;
+            totalCommissionRate += rate;
+        });
+
+        const cashAdvanceTax = cashAdvance * 0.10;
+        const netCashAdvance = cashAdvance - cashAdvanceTax;
+        const adjustedNetSellingPrice = netSellingPrice - netCashAdvance;
+
+        let totalCommission = adjustedNetSellingPrice * (totalCommissionRate / 100);
+        let totalGrossCommission;
+
+        if (particulars === 'PARTIAL COMM') {
+            totalGrossCommission = totalCommission * (partialPercentage / 100);
+        } else {
+            totalGrossCommission = totalCommission;
+        }
+
+        if (particulars === 'INCENTIVES') {
+            totalGrossCommission += incentiveAmount;
+        }
+
+        let vatableAmount = vatRate > 0 ? totalGrossCommission / (1 + vatRate / 100) : totalGrossCommission;
+        let withholdingTax = withholdingTaxPercentage > 0 ? vatableAmount * (withholdingTaxPercentage / 100) : 0;
+        let vatShare = vatRate > 0 ? vatableAmount * 0.108 : 0;
+        const totalTaxDeductions = withholdingTax + vatShare;
+        const finalNetCommission = totalGrossCommission - totalTaxDeductions;
+
+        document.getElementById('totalCommissionRateDisplay').textContent = `${totalCommissionRate.toFixed(2)}%`;
+        document.getElementById('totalGrossCommissionDisplay').textContent = `₱${formatCurrency(totalGrossCommission)}`;
+        document.getElementById('vatableAmountDisplay').textContent = `₱${formatCurrency(vatableAmount)}`;
+        document.getElementById('totalTaxDeductionsDisplay').textContent = `₱${formatCurrency(totalTaxDeductions)}`;
+        document.getElementById('finalNetCommissionDisplay').textContent = `₱${formatCurrency(finalNetCommission)}`;
+
+        let totalGrossCommissionSum = 0, totalWithholdingSum = 0, totalNetCommissionSum = 0;
         const tableBody = document.getElementById('previewTableBody');
         tableBody.innerHTML = '';
 
         positions.forEach(pos => {
             const rateInput = document.getElementById(pos.id);
-            const rate = parseFloat(rateInput ? rateInput.value : 0) || 0;
+            const positionRate = parseFloat(rateInput ? rateInput.value : 0) || 0;
 
-            if (rate > 0) {
-                let baseCommission = adjustedTotal * (rate / 100);
-                if (particulars === 'PARTIAL COMM') {
-                    baseCommission *= (partialPercentage / 100);
-                }
+            if (positionRate > 0) {
+                const positionGrossCommission = finalNetCommission * (positionRate / totalCommissionRate);
+                const withholdingTax = pos.name === 'Funds' ? 0 : positionGrossCommission * (pos.taxRate / 100);
+                const positionNetCommission = positionGrossCommission - withholdingTax;
 
-                let grossCommission = baseCommission;
-                if (particulars === 'INCENTIVES' && pos.is_primary) {
-                    grossCommission += incentiveAmount;
-                }
+                totalGrossCommissionSum += positionGrossCommission;
+                totalWithholdingSum += withholdingTax;
+                totalNetCommissionSum += positionNetCommission;
 
-                const tax = grossCommission * (pos.taxRate / 100);
-                const netCommission = grossCommission - tax;
-
-                totalGrossCommission += grossCommission;
-                totalTax += tax;
-                totalNetCommission += netCommission;
+                let particularsDisplay = particulars === 'PARTIAL COMM' ? `${partialPercentage.toFixed(0)}%` : particulars === 'INCENTIVES' ? 'INCENTIVES' : '100%';
 
                 const row = `
                     <tr>
-                        <td class="px-4 py-2">${pos.name}</td>
-                        <td class="px-4 py-2">${rate}%</td>
-                        <td class="px-4 py-2">${particulars === 'PARTIAL COMM' ? partialPercentage : 100}%</td>
-                        <td class="px-4 py-2">₱${formatCurrency(grossCommission)}</td>
-                        <td class="px-4 py-2">₱${formatCurrency(tax)}</td>
-                        <td class="px-4 py-2 font-semibold">₱${formatCurrency(netCommission)}</td>
+                        <td>${pos.name}</td>
+                        <td>${particularsDisplay}</td>
+                        <td>${positionRate}%</td>
+                        <td class="amount">₱${formatCurrency(positionGrossCommission)}</td>
+                        <td class="amount">₱${formatCurrency(withholdingTax)}</td>
+                        <td class="amount">₱${formatCurrency(positionNetCommission)}</td>
                     </tr>`;
                 tableBody.innerHTML += row;
 
-                // Add hidden fields for form submission
                 const positionInput = document.createElement('input');
                 positionInput.type = 'hidden';
                 positionInput.name = 'position';
@@ -426,9 +1159,9 @@
             }
         });
 
-        document.getElementById('totalGrossCommission').textContent = `₱${formatCurrency(totalGrossCommission)}`;
-        document.getElementById('totalTax').textContent = `₱${formatCurrency(totalTax)}`;
-        document.getElementById('totalNetCommission').textContent = `₱${formatCurrency(totalNetCommission)}`;
+        document.getElementById('totalGrossCommission').textContent = `₱${formatCurrency(totalGrossCommissionSum)}`;
+        document.getElementById('totalWithholding').textContent = `₱${formatCurrency(totalWithholdingSum)}`;
+        document.getElementById('totalNetCommission').textContent = `₱${formatCurrency(totalNetCommissionSum)}`;
     }
 
     function updateAgentInfo() {
@@ -444,33 +1177,22 @@
         updateCommissionPreview();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
 
-        // Add event listeners to all inputs that affect the calculation
         const inputs = [
-            'total_selling_price',
-            'cash_advance',
-            'partial_percentage',
-            'incentive_amount',
-            'manager_commission_rate',
-            'om_rate',
-            'cf_rate',
-            'founder_rate',
-            'funds_rate',
-            'withholding_tax_rate',
-            'operation_manager_tax_rate',
-            'co_founder_tax_rate',
-            'founder_tax_rate',
-            'funds_tax_rate'
+            'total_selling_price', 'cash_advance', 'partial_percentage', 'incentive_amount',
+            'manager_commission_rate', 'vat_rate', 'withholding_tax_percentage',
+            'om_rate', 'cf_rate', 'founder_rate', 'funds_rate',
+            'withholding_tax_rate', 'operation_manager_tax_rate', 'co_founder_tax_rate', 'founder_tax_rate'
         ];
 
         inputs.forEach(id => {
             const input = document.getElementById(id);
-            if (input) {
-                input.addEventListener('input', updateCommissionPreview);
-            }
+            if (input) input.addEventListener('input', updateCommissionPreview);
         });
 
         document.getElementById('particulars').addEventListener('change', updateFieldsVisibility);
-        document.getElementById('agent_select').addEventListener('change', updateAgentInfo);
+        if (document.getElementById('agent_select')) {
+            document.getElementById('agent_select').addEventListener('change', updateAgentInfo);
+        }
     });
 </script>
 

@@ -223,7 +223,7 @@
                 <input type="text" class="item-code-edit hidden w-full px-1 py-0.5 text-xs border border-gray-300 rounded" value="{{ item.item_code }}">
               </td>
               <td class="p-3 border-b border-gray-200 item-view">
-                <span class="item-description-display">Commission Claim for Unit ({{ item.unit_id }}) sold to ({{ item.buyer_name }})
+                <span class="item-description-display">Commission FAO for Unit ({{ item.unit_id }}) sold to ({{ item.buyer_name }})
                   {% if is_combined_invoice %}
                     <div class="text-xs text-gray-500 mt-1">
                       Commission: 
@@ -405,16 +405,7 @@
         <p class="font-bold">Prepared By</p>
         <p class="text-gray-600">{{ invoice.prepared_by.get_full_name }}</p>
         <p class="text-gray-500">{{ prepared_by_display_date|date:"m/d/Y" }}</p>
-        {% if can_prepare %}
-        <div class="mt-2 space-x-1 no-print">
-          <button onclick="document.getElementById('signature-upload-prepared_by').click()" class="btn-sig" id="btn-prepared_by">
-            {% if invoice.prepared_by_signature %}Edit Signature{% else %}Attach Signature{% endif %}
-          </button>
-          <button class="btn-sig-clear clear-signature-btn">Clear</button>
-          <input type="file" id="signature-upload-prepared_by" class="hidden" accept="image/*">
-        </div>
-        {% endif %}
-      </div>
+              </div>
       <div class="signature-container" data-role="checked_by">
         <img id="signature-checked_by" src="{{ checked_by_signature_url }}" alt="Signature" class="h-16 w-auto mx-auto mb-2 border-b pb-2">
         <p class="font-bold">Checked By</p>
@@ -424,16 +415,7 @@
         {% else %}
         <p class="text-gray-400 italic">(Not yet checked)</p>
         {% endif %}
-        {% if can_check %}
-        <div class="mt-2 space-x-1 no-print">
-          <button onclick="document.getElementById('signature-upload-checked_by').click()" class="btn-sig" id="btn-checked_by">
-            {% if invoice.checked_by_signature %}Edit Signature{% else %}Attach Signature{% endif %}
-          </button>
-          <button class="btn-sig-clear clear-signature-btn">Clear</button>
-          <input type="file" id="signature-upload-checked_by" class="hidden" accept="image/*">
-        </div>
-        {% endif %}
-      </div>
+              </div>
       <div class="signature-container" data-role="approved_by">
         <img id="signature-approved_by" src="{{ approved_by_signature_url }}" alt="Signature" class="h-16 w-auto mx-auto mb-2 border-b pb-2">
         <p class="font-bold">Approved By</p>
@@ -443,16 +425,7 @@
         {% else %}
         <p class="text-gray-400 italic">(Not yet approved)</p>
         {% endif %}
-        {% if can_approve %}
-        <div class="mt-2 space-x-1 no-print">
-          <button onclick="document.getElementById('signature-upload-approved_by').click()" class="btn-sig" id="btn-approved_by">
-            {% if invoice.approved_by_signature %}Edit Signature{% else %}Attach Signature{% endif %}
-          </button>
-          <button class="btn-sig-clear clear-signature-btn">Clear</button>
-          <input type="file" id="signature-upload-approved_by" class="hidden" accept="image/*">
-        </div>
-        {% endif %}
-      </div>
+              </div>
     </section>
 
     <!-- Footer -->
@@ -802,77 +775,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('add-item-btn').addEventListener('click', addItemRow);
 
-    // Function to sync signatures across all three roles
-    function syncSignaturesAcrossRoles(uploadedSignatureUrl) {
-        document.getElementById('signature-prepared_by').src = uploadedSignatureUrl;
-        document.getElementById('signature-checked_by').src = uploadedSignatureUrl;
-        document.getElementById('signature-approved_by').src = uploadedSignatureUrl;
-    }
-
-    // Function to clear all signatures
-    function clearAllSignatures() {
-        const placeholderUrl = "{% static 'media/placeholder.png' %}";
-        document.getElementById('signature-prepared_by').src = placeholderUrl;
-        document.getElementById('signature-checked_by').src = placeholderUrl;
-        document.getElementById('signature-approved_by').src = placeholderUrl;
-    }
-
-    document.querySelectorAll('.signature-container').forEach(container => {
-        const role = container.dataset.role;
-        const uploadInput = document.getElementById(`signature-upload-${role}`);
-        const clearButton = container.querySelector('.clear-signature-btn');
-
-        if (uploadInput) {
-            uploadInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const formData = new FormData();
-                    formData.append('signature_image', this.files[0]);
-
-                    fetch(`{% url 'upload_signature' invoice.id 'role_placeholder' %}`.replace('role_placeholder', role), {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrftoken,
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            syncSignaturesAcrossRoles(data.signature_url);
-                            showAlert('Signature uploaded successfully.');
-                        } else {
-                            showAlert(data.error, 'error');
-                        }
-                    })
-                    .catch(error => showAlert('An error occurred.', 'error'));
-                }
-            });
-        }
-
-        if (clearButton) {
-            clearButton.addEventListener('click', function() {
-                fetch(`{% url 'upload_signature' invoice.id 'role_placeholder' %}`.replace('role_placeholder', role), {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrftoken,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ action: 'clear' })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        clearAllSignatures();
-                        showAlert('Signature cleared.');
-                    } else {
-                        showAlert(data.error, 'error');
-                    }
-                })
-                .catch(error => showAlert('An error occurred.', 'error'));
-            });
-        }
     });
-});
 </script>
 
   

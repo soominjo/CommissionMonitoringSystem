@@ -62,8 +62,6 @@ __all__ = [
     "invoice_pdf",
     "invoice_csv",
     "email_invoice",
-    "sign_invoice",
-    "upload_signature",
 ]
 
 
@@ -95,14 +93,6 @@ def _get_default_signature_url(role):
 
 def _get_signature_url_or_default(invoice, role):
     """Get signature URL from invoice field or return default signature URL."""
-    # Get the signature field for this role
-    signature_field = getattr(invoice, f"{role}_signature", None)
-    
-    # If signature exists and has a file, return its URL
-    if signature_field and signature_field.name:
-        return signature_field.url
-    
-    # Otherwise return default signature URL
     return _get_default_signature_url(role)
 
 
@@ -1533,124 +1523,8 @@ def _get_invoice_context(invoice, request):
 def invoice_view(request, invoice_id):
     """Render a printable invoice page for the given BillingInvoice."""
     invoice = get_object_or_404(BillingInvoice, pk=invoice_id)
-    context = _get_invoice_context(invoice, request)    
+    context = _get_invoice_context(invoice, request)
     return render(request, 'invoice.html', context)
-
-
-@login_required
-@require_POST
-def sign_invoice(request, invoice_id, role):
-    invoice = get_object_or_404(BillingInvoice, id=invoice_id)
-
-    if role == 'checked_by' and request.user.is_staff and not invoice.checked_by:
-        invoice.checked_by = request.user
-        invoice.checked_by_date = now()
-        invoice.save()
-        messages.success(request, 'Invoice successfully marked as checked.')
-    elif role == 'approved_by' and request.user.is_superuser and not invoice.approved_by:
-        invoice.approved_by = request.user
-        invoice.approved_by_date = now()
-        invoice.save()
-        messages.success(request, 'Invoice successfully marked as approved.')
-    else:
-        messages.error(request, 'You do not have permission to perform this action or it has already been signed.')
-
-    return redirect('invoice_view', invoice_id=invoice.id)
-
-
-@login_required
-def upload_signature(request, invoice_id, role):
-    invoice = get_object_or_404(BillingInvoice, id=invoice_id)
-    
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
-    
-    # Get action from form data (role comes from URL parameter)
-    action = request.POST.get('action', 'upload')
-    
-    
-    if not role or role not in ['prepared_by', 'checked_by', 'approved_by']:
-        return JsonResponse({'success': False, 'error': 'Invalid role specified.'}, status=400)
-
-    # Permission checks
-    if role == 'prepared_by' and request.user != invoice.prepared_by:
-        return JsonResponse({'success': False, 'error': 'You do not have permission to sign as prepared by.'}, status=403)
-    if role == 'checked_by' and not request.user.is_staff:
-        return JsonResponse({'success': False, 'error': 'You do not have permission to sign as checked by.'}, status=403)
-    if role == 'approved_by' and not request.user.is_superuser:
-        return JsonResponse({'success': False, 'error': 'You do not have permission to sign as approved by.'}, status=403)
-
-    if action == 'clear':
-        # Clear only the specific signature
-        sig_field_name = f"{role}_signature"
-        sig_field = getattr(invoice, sig_field_name, None)
-        if sig_field and sig_field.name and os.path.exists(sig_field.path):
-            os.remove(sig_field.path)
-        setattr(invoice, sig_field_name, None)
-        
-        # Clear related date fields
-        if role == 'prepared_by':
-            invoice.prepared_by_date = None
-        elif role == 'checked_by':
-            invoice.checked_by = None
-            invoice.checked_by_date = None
-        elif role == 'approved_by':
-            invoice.approved_by = None
-            invoice.approved_by_date = None
-            
-        invoice.save()
-        return JsonResponse({'success': True, 'message': f'{role.replace("_", " ").title()} signature cleared.'})
-
-    elif action == 'upload' and ('signature' in request.FILES or 'signature_image' in request.FILES):
-        signature_image = request.FILES.get('signature') or request.FILES.get('signature_image')
-
-        # Delete only the old signature for this role
-        sig_field_name = f"{role}_signature"
-        sig_field = getattr(invoice, sig_field_name, None)
-        if sig_field and sig_field.name and os.path.exists(sig_field.path):
-            os.remove(sig_field.path)
-
-        # Save the new signature to the specific role field only
-        setattr(invoice, sig_field_name, signature_image)
-
-        # Update date fields and user fields based on the specific role
-        if role == 'prepared_by':
-            invoice.prepared_by_date = now()
-        elif role == 'checked_by':
-            invoice.checked_by = request.user
-            invoice.checked_by_date = now()
-        elif role == 'approved_by':
-            invoice.approved_by = request.user
-            invoice.approved_by_date = now()
-
-        # Save only the specific fields to avoid affecting other signature fields
-        update_fields = [sig_field_name]
-        if role == 'prepared_by':
-            update_fields.append('prepared_by_date')
-        elif role == 'checked_by':
-            update_fields.extend(['checked_by', 'checked_by_date'])
-        elif role == 'approved_by':
-            update_fields.extend(['approved_by', 'approved_by_date'])
-            
-        invoice.save(update_fields=update_fields)
-
-        # Refresh to get the new URL
-        invoice.refresh_from_db()
-        
-        signature_field = getattr(invoice, sig_field_name)
-        signature_url = signature_field.url if signature_field else ''
-        
-        return JsonResponse({
-            'success': True,
-            'message': f'{role.replace("_", " ").title()} signature uploaded successfully.',
-            'signature_url': signature_url
-        })
-
-    else:
-        return JsonResponse({
-            'success': False, 
-            'error': f'Invalid action or missing file. Action: {action}, Files: {list(request.FILES.keys())}'
-        }, status=400)
 
 
 @login_required

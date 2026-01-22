@@ -445,7 +445,7 @@ function shouldAutoPopulateTranche(trancheId) {
     // Only auto-populate if:
     // 1. Status is "Pending" (not "Received" or "Partial")
     // 2. Current actual commission is 0 or very close to 0 (accounting for floating point precision)
-    return statusText === 'Pending' && currentValue <= 0.01;
+    return statusText === 'Pending' && currentValue <= 0.01
 }
 
 // Auto-populate tranche data when checkbox is selected

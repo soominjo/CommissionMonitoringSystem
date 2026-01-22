@@ -18,16 +18,15 @@ urlpatterns = [
     path('invoice/<int:invoice_id>/update-billing-details/', invoice_views.update_billing_details, name='update_billing_details'),
     path('invoice/<int:invoice_id>/update-invoice-items/', invoice_views.update_invoice_items, name='update_invoice_items'),
     path('invoice/<int:invoice_id>/update/', invoice_views.update_invoice, name='update_invoice'),
-    path('invoice/<int:invoice_id>/sign/<str:role>/', invoice_views.sign_invoice, name='sign_invoice'),
-    path('invoice/<int:invoice_id>/upload-signature/<str:role>/', invoice_views.upload_signature, name='upload_signature'),
     path('sales/export/', views.export_sales_excel, name='export_sales_excel'),
     path('top5/export/', views.export_top5_excel, name='export_top5_excel'),
+
 
     path('report-problem/', report_problem, name='report_problem'),
     path('problem-dashboard/', problem_dashboard, name='problem_dashboard'),
     path('problem/<int:problem_id>/', problem_detail, name='problem_detail'),
     path('problem/<int:problem_id>/delete/', delete_problem, name='delete_problem'),
-    
+
     path('', views.home, name='home'),  
     path('navbar/', views.navbar, name='navbar'), 
     path('signin/', views.signin, name='signin'),  

@@ -2962,7 +2962,7 @@ def tranches_view(request):
                                 project_name = str(row['project_name']).strip()
                                 unit_id = str(row['unit_id']).strip()
                                 total_contract_price = Decimal(str(row['total_contract_price']))
-                                commission_rate = Decimal(str(row['commission_rate']))
+                                commission_rate = Decimal(str(row['commission_rate']))  
                                 
                                 # Optional fields with defaults
                                 vat_rate = Decimal(str(row.get('vat_rate', 12)))

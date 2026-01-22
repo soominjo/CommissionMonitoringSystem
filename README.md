@@ -1,5 +1,3 @@
 # sales
 
-hello
 
-hi
